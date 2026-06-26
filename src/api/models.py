@@ -9,11 +9,15 @@ class User(db.Model):
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean(), nullable=False)
+    is_horeca: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False)
+    name: Mapped[str]= mapped_column(String(80), nullable=False)
 
 
     def serialize(self):
         return {
             "id": self.id,
             "email": self.email,
+            "is_horeca": self.is_horeca,
+            "name": self.name,
             # do not serialize the password, its a security breach
         }
