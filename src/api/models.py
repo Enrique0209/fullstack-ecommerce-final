@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import String, Boolean, ForeignKey, Float, Integer
+from datetime import datetime
+from sqlalchemy import String, Boolean, ForeignKey, Float, Integer, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 
 db = SQLAlchemy()
@@ -66,4 +67,53 @@ class Product(db.Model):
             "image_url": self.image_url,
             "subcategory_id": self.subcategory_id,
             
+        }
+    
+class CarItem(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
+    product_id: Mapped[int] = mapped_column(ForeignKey("product.id"), nullable=False)
+    quantity: Mapped[int] = mapped_column(Integer(), nullable=False)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "product_id": self.product_id,
+            "quantity": self.quantity,
+            
+        }
+    
+class Order(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(), nullable=False)
+    total: Mapped[float] = mapped_column(Float(), nullable=False)
+    status: Mapped[str] = mapped_column(String(50), nullable=False)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "created_at": self.created_at,
+            "total": self.total,
+            "status": self.status,
+            
+        }
+    
+class OrderItem(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    order_id: Mapped[int] = mapped_column(ForeignKey("order.id"), nullable=False)
+    product_id: Mapped[int] = mapped_column(ForeignKey("product.id"), nullable=False)
+    quantity: Mapped[int] = mapped_column(Integer(), nullable=False)
+    unit_price: Mapped[float]=mapped_column(Float(), nullable=False)
+   
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "order_id": self.order_id,
+            "product_id": self.product_id,
+            "quantity": self.quantity,
+            "unit_price": self.unit_price,
         }
