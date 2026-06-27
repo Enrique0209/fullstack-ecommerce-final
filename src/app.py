@@ -11,6 +11,8 @@ from api.routes import api
 from api.admin import setup_admin
 from api.commands import setup_commands
 from flask_bcrypt import Bcrypt
+from flask_jwt_extended import JWTManager
+
 
 # from models import Person
 
@@ -19,6 +21,8 @@ static_file_dir = os.path.join(os.path.dirname(
     os.path.realpath(__file__)), '../dist/')
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "clave-secreta-temporal")
+jwt = JWTManager(app)
 app.url_map.strict_slashes = False
 
 # database condiguration
