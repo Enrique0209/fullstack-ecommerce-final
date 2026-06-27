@@ -5,6 +5,10 @@ from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, User
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
+from flask_bcrypt import Bcrypt
+
+
+bcrypt = Bcrypt()
 
 api = Blueprint('api', __name__)
 
@@ -20,3 +24,20 @@ def handle_hello():
     }
 
     return jsonify(response_body), 200
+
+
+@api.route('/register', methods=['POST'])
+def register():
+    body = request.get_json()
+    email = body.get("email")
+    password = body.get("password")
+    name = body.get("name")
+    password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
+    new_user = User(email=email, password=password_hash, name=name)
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({"message": "Registro exitoso :)"}), 201
+
+
+
+
