@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User
+from api.models import db, User, Product
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
@@ -51,5 +51,18 @@ def login():
     token = create_access_token(identity=str(user.id))
     return jsonify({"token": token, "user": user.serialize()}), 200
    
+@api.route('/product', methods=['GET'])
+def product():
+    products = Product.query.all()
+    serialized_products = [product.serialize() for product in products]
+    return jsonify(serialized_products), 200
+    
+    
+@api.route('/product/<int:product_id>', methods=['GET'])
+def get_product(product_id):
+    product = Product.query.get(product_id)
+    if product is None:
+        return jsonify({"message": "Producto no encontrado"}), 404
+    return jsonify(product.serialize()), 200
 
 
