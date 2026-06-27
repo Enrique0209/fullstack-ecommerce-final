@@ -34,6 +34,7 @@ class Category(db.Model):
         }
         
 class SubCategory(db.Model):
+    __tablename__ = "subcategory"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]= mapped_column(String(80), nullable=False)
     category_id: Mapped[int] = mapped_column(ForeignKey("category.id"), nullable=False)
@@ -70,6 +71,7 @@ class Product(db.Model):
         }
     
 class CarItem(db.Model):
+    __tablename__ = "cart_item"
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
     product_id: Mapped[int] = mapped_column(ForeignKey("product.id"), nullable=False)
@@ -102,6 +104,7 @@ class Order(db.Model):
         }
     
 class OrderItem(db.Model):
+    __tablename__ = "order_item"
     id: Mapped[int] = mapped_column(primary_key=True)
     order_id: Mapped[int] = mapped_column(ForeignKey("order.id"), nullable=False)
     product_id: Mapped[int] = mapped_column(ForeignKey("product.id"), nullable=False)
