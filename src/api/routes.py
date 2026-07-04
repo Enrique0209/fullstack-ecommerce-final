@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Product, Category, SubCategory
+from api.models import db, User, Product, Category, SubCategory, CarItem
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
@@ -116,6 +116,7 @@ def get_subcategories():
     subcategories = SubCategory.query.all()
     return jsonify([s.serialize() for s in subcategories]), 200
 
+
 @api.route('/cart', methods=['GET'])
 @jwt_required()
 def get_cart():
@@ -123,6 +124,7 @@ def get_cart():
     # aquí obtienes todos los CartItem donde user_id == user_id
     items = CarItem.query.filter_by(user_id=user_id).all()
     return jsonify([item.serialize() for item in items]), 200
+
 
 @api.route('/cart', methods=['POST'])
 @jwt_required()
@@ -133,15 +135,18 @@ def add_to_cart():
     quantity = body.get("quantity", 1)
 
     # Verifica si el producto ya está en el carrito del usuario
-    existing_item = CarItem.query.filter_by(user_id=user_id, product_id=product_id).first()
+    existing_item = CarItem.query.filter_by(
+        user_id=user_id, product_id=product_id).first()
     if existing_item:
         existing_item.quantity += quantity
     else:
-        new_item = CarItem(user_id=user_id, product_id=product_id, quantity=quantity)
+        new_item = CarItem(
+            user_id=user_id, product_id=product_id, quantity=quantity)
         db.session.add(new_item)
 
     db.session.commit()
     return jsonify({"message": "Producto agregado al carrito exitosamente :)"}), 201
+
 
 @api.route('/cart/<int:item_id>', methods=['DELETE'])
 @jwt_required()
