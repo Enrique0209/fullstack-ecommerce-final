@@ -14,6 +14,21 @@ export const Catalog = () => {
         loadProducts()
     }, [])
 
+    const addToCart = async (product_id) => {
+        const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/cart", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + store.token
+            },
+            body: JSON.stringify({ product_id: product_id, quantity: 1 })
+        })
+        if (response.ok) {
+            alert("Producto agregado al carrito")
+        }
+        return response.ok
+    }
+
     return (
         <div>
             <h1>Catálogo</h1>
@@ -22,6 +37,7 @@ export const Catalog = () => {
                     <h3>{product.name}</h3>
                     <p>{product.description}</p>
                     <p>€{product.price}</p>
+                    <button onClick={() => addToCart(product.id)}>Agregar al carrito</button>
                 </div>
             ))}
         </div>
