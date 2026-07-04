@@ -50,14 +50,14 @@ def login():
         return jsonify({"message": "Credenciales incorrectas"}), 401
     token = create_access_token(identity=str(user.id))
     return jsonify({"token": token, "user": user.serialize()}), 200
-   
-   
-    
+
+
 @api.route('/product', methods=['GET'])
 def get_products():
     products = Product.query.all()
     serialized_products = [product.serialize() for product in products]
     return jsonify(serialized_products), 200
+
 
 @api.route('/product', methods=['POST'])
 def create_product():
@@ -68,12 +68,13 @@ def create_product():
     description = body.get("description")
     stock = body.get("stock")
     subcategory_id = body.get("subcategory_id")
-    new_product = Product(name=name, price=price, price_horeca=price_horeca, 
-                         description=description, stock=stock, 
-                         subcategory_id=subcategory_id)
+    new_product = Product(name=name, price=price, price_horeca=price_horeca,
+                          description=description, stock=stock,
+                          subcategory_id=subcategory_id)
     db.session.add(new_product)
     db.session.commit()
     return jsonify({"message": "Producto creado exitosamente :)"}), 201
+
 
 @api.route('/product/<int:product_id>', methods=['GET'])
 def get_product(product_id):
@@ -81,6 +82,7 @@ def get_product(product_id):
     if product is None:
         return jsonify({"message": "Producto no encontrado"}), 404
     return jsonify(product.serialize()), 200
+
 
 @api.route('/category', methods=['POST'])
 def create_category():
@@ -90,6 +92,7 @@ def create_category():
     db.session.add(new_category)
     db.session.commit()
     return jsonify({"message": "Categoría creada exitosamente :)"}), 201
+
 
 @api.route('/subcategory', methods=['POST'])
 def create_subcategory():
@@ -101,3 +104,14 @@ def create_subcategory():
     db.session.commit()
     return jsonify({"message": "Subcategoría creada exitosamente :)"}), 201
 
+
+@api.route('/category', methods=['GET'])
+def get_categories():
+    categories = Category.query.all()
+    return jsonify([c.serialize() for c in categories]), 200
+
+
+@api.route('/subcategory', methods=['GET'])
+def get_subcategories():
+    subcategories = SubCategory.query.all()
+    return jsonify([s.serialize() for s in subcategories]), 200
