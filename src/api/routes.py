@@ -6,7 +6,7 @@ from api.models import db, User, Product, Category, SubCategory
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
 
 bcrypt = Bcrypt()
@@ -115,3 +115,42 @@ def get_categories():
 def get_subcategories():
     subcategories = SubCategory.query.all()
     return jsonify([s.serialize() for s in subcategories]), 200
+
+@api.route('/cart', methods=['GET'])
+@jwt_required()
+def get_cart():
+    user_id = get_jwt_identity()
+    # aquí obtienes todos los CartItem donde user_id == user_id
+    items = CarItem.query.filter_by(user_id=user_id).all()
+    return jsonify([item.serialize() for item in items]), 200
+
+@api.route('/cart', methods=['POST'])
+@jwt_required()
+def add_to_cart():
+    user_id = get_jwt_identity()
+    body = request.get_json()
+    product_id = body.get("product_id")
+    quantity = body.get("quantity", 1)
+
+    # Verifica si el producto ya está en el carrito del usuario
+    existing_item = CarItem.query.filter_by(user_id=user_id, product_id=product_id).first()
+    if existing_item:
+        existing_item.quantity += quantity
+    else:
+        new_item = CarItem(user_id=user_id, product_id=product_id, quantity=quantity)
+        db.session.add(new_item)
+
+    db.session.commit()
+    return jsonify({"message": "Producto agregado al carrito exitosamente :)"}), 201
+
+@api.route('/cart/<int:item_id>', methods=['DELETE'])
+@jwt_required()
+def remove_from_cart(item_id):
+    user_id = get_jwt_identity()
+    item = CarItem.query.filter_by(id=item_id, user_id=user_id).first()
+    if item is None:
+        return jsonify({"message": "Item no encontrado en el carrito"}), 404
+
+    db.session.delete(item)
+    db.session.commit()
+    return jsonify({"message": "Producto eliminado del carrito exitosamente :)"}), 200
