@@ -11,6 +11,7 @@ import { Single } from "./pages/Single";
 import { Demo } from "./pages/Demo";
 import { Login } from "./pages/Login";  
 import { Catalog } from "./pages/Catalog";  // Import the Catalog component
+import { Register } from "./pages/Register";  // Import the Register component
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
@@ -29,6 +30,7 @@ export const router = createBrowserRouter(
         <Route path="/demo" element={<Demo />} />
         <Route path="/login" element={<Login />} />
         <Route path="/catalog" element={<Catalog />} />  {/* Route for the Catalog page */}
+        <Route path="/register" element={<Register />} />  {/* Route for the Register page */}
       </Route>
     )
 );
