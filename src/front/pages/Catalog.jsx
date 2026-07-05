@@ -1,5 +1,6 @@
 import React, { useEffect } from "react"
 import useGlobalReducer from "../hooks/useGlobalReducer"
+import { Link } from "react-router-dom"
 
 export const Catalog = () => {
     const { store, dispatch } = useGlobalReducer()
@@ -37,6 +38,7 @@ export const Catalog = () => {
                     <h3>{product.name}</h3>
                     <p>{product.description}</p>
                     <p>€{product.price}</p>
+                    <Link to={`/product/${product.id}`}>Ver detalles</Link>
                     <button onClick={() => addToCart(product.id)}>Agregar al carrito</button>
                 </div>
             ))}

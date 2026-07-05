@@ -13,6 +13,7 @@ import { Login } from "./pages/Login";
 import { Catalog } from "./pages/Catalog";  // Import the Catalog component
 import { Register } from "./pages/Register";  // Import the Register component
 import { Cart } from "./pages/Cart";  // Import the Cart component
+import { ProductDetail } from "./pages/ProductDetail";  // Import the ProductDetail component
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
@@ -33,6 +34,7 @@ export const router = createBrowserRouter(
         <Route path="/catalog" element={<Catalog />} />  {/* Route for the Catalog page */}
         <Route path="/register" element={<Register />} />  {/* Route for the Register page */}
         <Route path="/cart" element={<Cart />} />  {/* Route for the Cart page */}
+        <Route path="/product/:id" element={<ProductDetail />} />  {/* Dynamic route for product details */}
       </Route>
     )
 );
