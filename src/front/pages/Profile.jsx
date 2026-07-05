@@ -51,22 +51,42 @@ export const Profile = () => {
     }
 
     return (
-        <div>
-            <h1>Mi Perfil</h1>
-            <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Tu nombre"
-            />
-            <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Tu email"
-            />
-            <button onClick={handleUpdateProfile}>Actualizar Perfil</button>
-            <button onClick={handleDeleteProfile}>Eliminar cuenta</button>
+    <div className="container d-flex justify-content-center align-items-center" style={{minHeight: "80vh"}}>
+        <div className="card shadow p-5" style={{width: "450px", border: "none"}}>
+            <h2 className="text-center mb-4" style={{fontFamily: "Georgia, serif", letterSpacing: "2px"}}>
+                MI PERFIL
+            </h2>
+            <div className="mb-3">
+                <label className="form-label text-muted">Nombre</label>
+                <input
+                    type="text"
+                    className="form-control"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                />
+            </div>
+            <div className="mb-4">
+                <label className="form-label text-muted">Email</label>
+                <input
+                    type="email"
+                    className="form-control"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                />
+            </div>
+            <button 
+                onClick={handleUpdateProfile}
+                className="btn w-100 mb-3"
+                style={{backgroundColor: "#C9A84C", color: "white", border: "none"}}>
+                Guardar cambios
+            </button>
+            <hr/>
+            <button 
+                onClick={handleDeleteProfile}
+                className="btn btn-outline-danger w-100">
+                Eliminar cuenta
+            </button>
         </div>
-    )
+    </div>
+)
 }

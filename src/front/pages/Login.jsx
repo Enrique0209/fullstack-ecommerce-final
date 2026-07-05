@@ -33,22 +33,40 @@ export const Login = () => {
     }
 
     return (
-        // aquí va el JSX
-        <div>
-            {error && <p style={{color: "red"}}>{error}</p>}
-            <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Tu email"
-            />
-            <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Tu contraseña"
-            />
-            <button onClick={handleLogin}>Iniciar sesión</button>
+    <div className="container d-flex justify-content-center align-items-center" style={{minHeight: "80vh"}}>
+        <div className="card shadow p-5" style={{width: "400px", border: "none"}}>
+            <h2 className="text-center mb-4" style={{fontFamily: "Georgia, serif", letterSpacing: "2px"}}>
+                INICIAR SESIÓN
+            </h2>
+            {error && <div className="alert alert-danger">{error}</div>}
+            <div className="mb-3">
+                <input
+                    type="email"
+                    className="form-control"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Tu email"
+                />
+            </div>
+            <div className="mb-3">
+                <input
+                    type="password"
+                    className="form-control"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Tu contraseña"
+                />
+            </div>
+            <button 
+                onClick={handleLogin} 
+                className="btn w-100 mb-3"
+                style={{backgroundColor: "#C9A84C", color: "white", border: "none"}}>
+                Iniciar sesión
+            </button>
+            <p className="text-center text-muted">
+                ¿No tienes cuenta? <a href="/register" style={{color: "#C9A84C"}}>Regístrate</a>
+            </p>
         </div>
-    )
+    </div>
+)
 }

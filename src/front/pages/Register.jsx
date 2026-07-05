@@ -32,27 +32,49 @@ export const Register = () => {
 
 
     return (
-    <div>
-        {error && <p style={{color: "red"}}>{error}</p>}
-        <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Tu nombre"
-        />
-        <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Tu email"
-        />
-        <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Tu contraseña"
-        />
-        <button onClick={handleRegister}>Registrarse</button>
+    <div className="container d-flex justify-content-center align-items-center" style={{minHeight: "80vh"}}>
+        <div className="card shadow p-5" style={{width: "400px", border: "none"}}>
+            <h2 className="text-center mb-4" style={{fontFamily: "Georgia, serif", letterSpacing: "2px"}}>
+                REGISTRO
+            </h2>
+            {error && <div className="alert alert-danger">{error}</div>}
+            <div className="mb-3">
+                <input
+                    type="text"
+                    className="form-control"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Tu nombre"
+                />
+            </div>
+            <div className="mb-3">
+                <input
+                    type="email"
+                    className="form-control"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Tu email"
+                />
+            </div>
+            <div className="mb-3">
+                <input
+                    type="password"
+                    className="form-control"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Tu contraseña"
+                />
+            </div>
+            <button 
+                onClick={handleRegister} 
+                className="btn w-100 mb-3"
+                style={{backgroundColor: "#C9A84C", color: "white", border: "none"}}>
+                Registrarse
+            </button>
+            <p className="text-center text-muted">
+                ¿Ya tienes cuenta? <a href="/login" style={{color: "#C9A84C"}}>Inicia sesión</a>
+            </p>
+        </div>
     </div>
 )
 }
