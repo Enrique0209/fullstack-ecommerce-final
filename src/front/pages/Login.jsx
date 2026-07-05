@@ -7,9 +7,13 @@ export const Login = () => {
     const [password, setPassword] = useState("")
     const { dispatch } = useGlobalReducer()
     const navigate = useNavigate()
+    const [error, setError] = useState("")
+
 
     const handleLogin = async () => {
         // aquí va la lógica
+        if (!email.includes("@")) { setError("Email no tiene un formato válido"); return }
+        if (password.length < 6) { setError("La contraseña debe tener mínimo 6 caracteres"); return }
         const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/login", {
             method: "POST",
             headers: {
@@ -19,22 +23,19 @@ export const Login = () => {
         })
 
         if (response.ok) {
-            const data = await response.json()
-            dispatch({
-                type: "set_user",
-                payload: { user: data.user, token: data.token },
-            })
-            navigate("/catalog")
-        } else {
-            // Manejar error de inicio de sesión
-            console.error("Error al iniciar sesión")
-        }
+    const data = await response.json()
+    dispatch({ type: "set_user", payload: { user: data.user, token: data.token } })
+    navigate("/catalog")
+} else {
+    setError("Email o contraseña incorrectos")
+}
 
     }
 
     return (
         // aquí va el JSX
         <div>
+            {error && <p style={{color: "red"}}>{error}</p>}
             <input
                 type="email"
                 value={email}
