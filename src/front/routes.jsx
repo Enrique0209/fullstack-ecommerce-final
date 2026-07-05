@@ -1,5 +1,3 @@
-// Import necessary components and functions from react-router-dom.
-
 import {
     createBrowserRouter,
     createRoutesFromElements,
@@ -9,32 +7,42 @@ import { Layout } from "./pages/Layout";
 import { Home } from "./pages/Home";
 import { Single } from "./pages/Single";
 import { Demo } from "./pages/Demo";
-import { Login } from "./pages/Login";  
-import { Catalog } from "./pages/Catalog";  // Import the Catalog component
-import { Register } from "./pages/Register";  // Import the Register component
-import { Cart } from "./pages/Cart";  // Import the Cart component
-import { ProductDetail } from "./pages/ProductDetail";  // Import the ProductDetail component
+import { Login } from "./pages/Login";
+import { Catalog } from "./pages/Catalog";
+import { Register } from "./pages/Register";
+import { Cart } from "./pages/Cart";
+import { ProductDetail } from "./pages/ProductDetail";
+import { Profile } from "./pages/Profile";
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
-    // CreateRoutesFromElements function allows you to build route elements declaratively.
-    // Create your routes here, if you want to keep the Navbar and Footer in all views, add your new routes inside the containing Route.
-    // Root, on the contrary, create a sister Route, if you have doubts, try it!
-    // Note: keep in mind that errorElement will be the default page when you don't get a route, customize that page to make your project more attractive.
-    // Note: The child paths of the Layout element replace the Outlet component with the elements contained in the "element" attribute of these child paths.
+      // Ruta principal - contiene el navbar y footer en todas las páginas
+      <Route path="/" element={<Layout />} errorElement={<h1>Página no encontrada</h1>} >
 
-      // Root Route: All navigation will start from here.
-      <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
+        {/* Página de inicio */}
+        <Route path="/" element={<Home />} />
 
-        {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
-        <Route path= "/" element={<Home />} />
-        <Route path="/single/:theId" element={ <Single />} />  {/* Dynamic route for single items */}
-        <Route path="/demo" element={<Demo />} />
+        {/* Catálogo de productos */}
+        <Route path="/catalog" element={<Catalog />} />
+
+        {/* Detalle de un producto específico */}
+        <Route path="/product/:id" element={<ProductDetail />} />
+
+        {/* Carrito de compras */}
+        <Route path="/cart" element={<Cart />} />
+
+        {/* Perfil del usuario */}
+        <Route path="/profile" element={<Profile />} />
+
+        {/* Registro de nuevo usuario */}
+        <Route path="/register" element={<Register />} />
+
+        {/* Inicio de sesión */}
         <Route path="/login" element={<Login />} />
-        <Route path="/catalog" element={<Catalog />} />  {/* Route for the Catalog page */}
-        <Route path="/register" element={<Register />} />  {/* Route for the Register page */}
-        <Route path="/cart" element={<Cart />} />  {/* Route for the Cart page */}
-        <Route path="/product/:id" element={<ProductDetail />} />  {/* Dynamic route for product details */}
+
+        {/* Rutas del template que no usamos pero dejamos */}
+        <Route path="/single/:theId" element={<Single />} />
+        <Route path="/demo" element={<Demo />} />
       </Route>
     )
 );
