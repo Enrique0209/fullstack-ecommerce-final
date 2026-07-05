@@ -13,19 +13,20 @@ bcrypt = Bcrypt()
 
 api = Blueprint('api', __name__)
 
-# Allow CORS requests to this API
 CORS(api)
 
 
+# ─── RUTA DE PRUEBA ───────────────────────────────────────────────────────────
+
 @api.route('/hello', methods=['POST', 'GET'])
 def handle_hello():
-
     response_body = {
         "message": "Hello! I'm a message that came from the backend, check the network tab on the google inspector and you will see the GET request"
     }
-
     return jsonify(response_body), 200
 
+
+# ─── AUTENTICACIÓN ────────────────────────────────────────────────────────────
 
 @api.route('/register', methods=['POST'])
 def register():
@@ -51,6 +52,8 @@ def login():
     token = create_access_token(identity=str(user.id))
     return jsonify({"token": token, "user": user.serialize()}), 200
 
+
+# ─── PRODUCTOS ────────────────────────────────────────────────────────────────
 
 @api.route('/product', methods=['GET'])
 def get_products():
@@ -84,6 +87,30 @@ def get_product(product_id):
     return jsonify(product.serialize()), 200
 
 
+@api.route('/product/<int:product_id>', methods=['PUT'])
+def update_product(product_id):
+    product = Product.query.get(product_id)
+    if product is None:
+        return jsonify({"message": "Producto no encontrado"}), 404
+    body = request.get_json()
+    product.name = body.get("name", product.name)
+    product.price = body.get("price", product.price)
+    product.price_horeca = body.get("price_horeca", product.price_horeca)
+    product.description = body.get("description", product.description)
+    product.stock = body.get("stock", product.stock)
+    product.subcategory_id = body.get("subcategory_id", product.subcategory_id)
+    db.session.commit()
+    return jsonify({"message": "Producto actualizado exitosamente :)"}), 200
+
+
+# ─── CATEGORÍAS ───────────────────────────────────────────────────────────────
+
+@api.route('/category', methods=['GET'])
+def get_categories():
+    categories = Category.query.all()
+    return jsonify([c.serialize() for c in categories]), 200
+
+
 @api.route('/category', methods=['POST'])
 def create_category():
     body = request.get_json()
@@ -92,6 +119,14 @@ def create_category():
     db.session.add(new_category)
     db.session.commit()
     return jsonify({"message": "Categoría creada exitosamente :)"}), 201
+
+
+# ─── SUBCATEGORÍAS ────────────────────────────────────────────────────────────
+
+@api.route('/subcategory', methods=['GET'])
+def get_subcategories():
+    subcategories = SubCategory.query.all()
+    return jsonify([s.serialize() for s in subcategories]), 200
 
 
 @api.route('/subcategory', methods=['POST'])
@@ -105,23 +140,12 @@ def create_subcategory():
     return jsonify({"message": "Subcategoría creada exitosamente :)"}), 201
 
 
-@api.route('/category', methods=['GET'])
-def get_categories():
-    categories = Category.query.all()
-    return jsonify([c.serialize() for c in categories]), 200
-
-
-@api.route('/subcategory', methods=['GET'])
-def get_subcategories():
-    subcategories = SubCategory.query.all()
-    return jsonify([s.serialize() for s in subcategories]), 200
-
+# ─── CARRITO ──────────────────────────────────────────────────────────────────
 
 @api.route('/cart', methods=['GET'])
 @jwt_required()
 def get_cart():
     user_id = get_jwt_identity()
-    # aquí obtienes todos los CartItem donde user_id == user_id
     items = CarItem.query.filter_by(user_id=user_id).all()
     return jsonify([item.serialize() for item in items]), 200
 
@@ -133,17 +157,12 @@ def add_to_cart():
     body = request.get_json()
     product_id = body.get("product_id")
     quantity = body.get("quantity", 1)
-
-    # Verifica si el producto ya está en el carrito del usuario
-    existing_item = CarItem.query.filter_by(
-        user_id=user_id, product_id=product_id).first()
+    existing_item = CarItem.query.filter_by(user_id=user_id, product_id=product_id).first()
     if existing_item:
         existing_item.quantity += quantity
     else:
-        new_item = CarItem(
-            user_id=user_id, product_id=product_id, quantity=quantity)
+        new_item = CarItem(user_id=user_id, product_id=product_id, quantity=quantity)
         db.session.add(new_item)
-
     db.session.commit()
     return jsonify({"message": "Producto agregado al carrito exitosamente :)"}), 201
 
@@ -155,12 +174,12 @@ def remove_from_cart(item_id):
     item = CarItem.query.filter_by(id=item_id, user_id=user_id).first()
     if item is None:
         return jsonify({"message": "Item no encontrado en el carrito"}), 404
-
     db.session.delete(item)
     db.session.commit()
     return jsonify({"message": "Producto eliminado del carrito exitosamente :)"}), 200
 
-# Perfil de usuario
+
+# ─── PERFIL DE USUARIO ────────────────────────────────────────────────────────
 
 @api.route('/profile', methods=['GET'])
 @jwt_required()
@@ -171,6 +190,7 @@ def get_profile():
         return jsonify({"message": "Usuario no encontrado"}), 404
     return jsonify(user.serialize()), 200
 
+
 @api.route('/profile', methods=['PUT'])
 @jwt_required()
 def update_profile():
@@ -178,12 +198,12 @@ def update_profile():
     user = User.query.get(user_id)
     if user is None:
         return jsonify({"message": "Usuario no encontrado"}), 404
-
     body = request.get_json()
     user.name = body.get("name", user.name)
     user.email = body.get("email", user.email)
     db.session.commit()
     return jsonify({"message": "Perfil actualizado exitosamente :)"}), 200
+
 
 @api.route('/profile', methods=['DELETE'])
 @jwt_required()
@@ -192,7 +212,6 @@ def delete_profile():
     user = User.query.get(user_id)
     if user is None:
         return jsonify({"message": "Usuario no encontrado"}), 404
-
     db.session.delete(user)
     db.session.commit()
     return jsonify({"message": "Perfil eliminado exitosamente :)"}), 200
