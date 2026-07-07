@@ -1,12 +1,12 @@
 export const initialStore = () => {
-  return {
-    message: null,
-    todos: [],
-    products: [],
-    user: null,
-    token: null,
-    cart: [],
-  };
+    return {
+        message: null,
+        todos: [],
+        products: [],
+        user: JSON.parse(localStorage.getItem("user")) || null,
+        token: localStorage.getItem("token") || null,
+        cart: [],
+    };
 };
 
 export default function storeReducer(store, action = {}) {
@@ -18,11 +18,13 @@ export default function storeReducer(store, action = {}) {
       };
 
     case "set_user":
-      return {
+    localStorage.setItem("token", action.payload.token)
+    localStorage.setItem("user", JSON.stringify(action.payload.user))
+    return {
         ...store,
         user: action.payload.user,
         token: action.payload.token,
-      };
+    };
 
     case "set_cart":
       return {
