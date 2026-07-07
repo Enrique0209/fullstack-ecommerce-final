@@ -215,3 +215,55 @@ def delete_profile():
     db.session.delete(user)
     db.session.commit()
     return jsonify({"message": "Perfil eliminado exitosamente :)"}), 200
+
+# ─── Panel de Admin ────────────────────────────────────────────────────────
+
+@api.route('/admin/category', methods=['POST'])
+@jwt_required()
+def admin_create_category():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    if not user.is_admin:
+        return jsonify({"message": "Acceso denegado"}), 403
+    body = request.get_json()
+    name = body.get("name")
+    new_category = Category(name=name)
+    db.session.add(new_category)
+    db.session.commit()
+    return jsonify({"message": "Categoría creada exitosamente :)"}), 201
+
+@api.route('/admin/subcategory', methods=['POST'])
+@jwt_required()
+def admin_create_subcategory():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    if not user.is_admin:
+        return jsonify({"message": "Acceso denegado"}), 403
+    body = request.get_json()
+    name = body.get("name")
+    category_id = body.get("category_id")
+    new_subcategory = SubCategory(name=name, category_id=category_id)
+    db.session.add(new_subcategory)
+    db.session.commit()
+    return jsonify({"message": "Subcategoría creada exitosamente :)"}), 201
+
+@api.route('/admin/product', methods=['POST'])
+@jwt_required()
+def admin_create_product():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    if not user.is_admin:
+        return jsonify({"message": "Acceso denegado"}), 403
+    body = request.get_json()
+    name = body.get("name")
+    price = body.get("price")
+    price_horeca = body.get("price_horeca")
+    description = body.get("description")
+    stock = body.get("stock")
+    subcategory_id = body.get("subcategory_id")
+    new_product = Product(name=name, price=price, price_horeca=price_horeca,
+                          description=description, stock=stock,
+                          subcategory_id=subcategory_id)
+    db.session.add(new_product)
+    db.session.commit()
+    return jsonify({"message": "Producto creado exitosamente :)"}), 201
