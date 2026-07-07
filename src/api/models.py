@@ -11,6 +11,7 @@ class User(db.Model):
     password: Mapped[str] = mapped_column(nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=True)
     is_horeca: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False)
+    is_admin: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False)
     name: Mapped[str]= mapped_column(String(80), nullable=False)
 
 
@@ -20,6 +21,7 @@ class User(db.Model):
             "email": self.email,
             "is_horeca": self.is_horeca,
             "name": self.name,
+            "is_admin": self.is_admin,
             # do not serialize the password, its a security breach
         }
     
