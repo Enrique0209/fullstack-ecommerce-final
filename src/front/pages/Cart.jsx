@@ -1,5 +1,6 @@
 import React, { useEffect } from "react"
 import useGlobalReducer from "../hooks/useGlobalReducer"
+import { PayPalButtons } from "@paypal/react-paypal-js"
 
 export const Cart = () => {
     const { store, dispatch } = useGlobalReducer()
@@ -64,6 +65,39 @@ export const Cart = () => {
                 </div>
             </div>
         )}
+        {store.cart.length > 0 && (
+    <div className="row justify-content-center mt-4">
+        <div className="col-md-8">
+            <div className="card shadow p-4" style={{border: "none"}}>
+                <h4 style={{fontFamily: "Georgia, serif"}}>
+                    Total: €{store.cart.reduce((sum, item) => {
+                        const product = store.products.find(p => p.id === item.product_id)
+                        return sum + (product ? product.price * item.quantity : 0)
+                    }, 0).toFixed(2)}
+                </h4>
+                <PayPalButtons
+                    createOrder={(data, actions) => {
+                        return actions.order.create({
+                            purchase_units: [{
+                                amount: {
+                                    value: store.cart.reduce((sum, item) => {
+                                        const product = store.products.find(p => p.id === item.product_id)
+                                        return sum + (product ? product.price * item.quantity : 0)
+                                    }, 0).toFixed(2)
+                                }
+                            }]
+                        })
+                    }}
+                    onApprove={(data, actions) => {
+                        return actions.order.capture().then(() => {
+                            alert("¡Pago completado con éxito!")
+                        })
+                    }}
+                />
+            </div>
+        </div>
+    </div>
+)}
     </div>
 )
 }
