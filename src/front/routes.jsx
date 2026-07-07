@@ -13,6 +13,7 @@ import { Register } from "./pages/Register";
 import { Cart } from "./pages/Cart";
 import { ProductDetail } from "./pages/ProductDetail";
 import { Profile } from "./pages/Profile";
+import { Admin } from "./pages/Admin";
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
@@ -43,6 +44,8 @@ export const router = createBrowserRouter(
         {/* Rutas del template que no usamos pero dejamos */}
         <Route path="/single/:theId" element={<Single />} />
         <Route path="/demo" element={<Demo />} />
+        {/* Rutas de administración */}
+        <Route path="/admin" element={<Admin />} />
       </Route>
     )
 );
