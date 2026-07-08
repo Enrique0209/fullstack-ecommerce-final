@@ -270,11 +270,11 @@ def admin_create_product():
 
 
 # ─── Hacer admin temporal ────────────────────────────────────────────────────────
-@api.route('/make-admin/<email>', methods=['GET'])
-def make_admin(email):
-    user = User.query.filter_by(email=email).first()
-    if user is None:
-        return jsonify({"message": "Usuario no encontrado"}), 404
-    user.is_admin = True
-    db.session.commit()
-    return jsonify({"message": "Usuario actualizado a admin", "email": user.email}), 200
+# @api.route('/make-admin/<email>', methods=['GET'])
+# def make_admin(email):
+#     user = User.query.filter_by(email=email).first()
+#     if user is None:
+#         return jsonify({"message": "Usuario no encontrado"}), 404
+#     user.is_admin = True
+#     db.session.commit()
+#     return jsonify({"message": "Usuario actualizado a admin", "email": user.email}), 200
