@@ -31,42 +31,70 @@ export const Catalog = () => {
     }
 
     return (
-    <div className="container py-5">
-        <h1 className="text-center mb-5" style={{fontFamily: "Georgia, serif", letterSpacing: "3px"}}>
-            CATÁLOGO
-        </h1>
-        <div className="row row-cols-1 row-cols-md-3 g-4">
-            {store.products.map((product) => (
-                <div key={product.id} className="col">
-                    <div className="card h-100 shadow" style={{border: "none"}}>
-                        <img 
-    src={product.image_url || "https://placehold.co/300x200?text=Sin+imagen"} 
-    className="card-img-top"
-    style={{height: "200px", objectFit: "cover"}}
-/>
-                        <div className="card-body d-flex flex-column">
-                            <h5 className="card-title" style={{fontFamily: "Georgia, serif"}}>
-                                {product.name}
-                            </h5>
-                            <p className="card-text text-muted">{product.description}</p>
-                            <p className="fw-bold mt-auto" style={{color: "#C9A84C", fontSize: "1.2rem"}}>
-                                €{product.price}
-                            </p>
-                            <div className="d-flex gap-2 mt-2">
-                                <Link to={`/product/${product.id}`} className="btn btn-outline-dark btn-sm flex-grow-1">
-                                    Ver detalles
-                                </Link>
-                                <button 
-                                    onClick={() => addToCart(product.id)} 
-                                    className="btn btn-sm flex-grow-1"
-                                    style={{backgroundColor: "#C9A84C", color: "white", border: "none"}}>
-                                    + Carrito
-                                </button>
+    <div style={{backgroundColor: "#F7F5F0", minHeight: "100vh"}}>
+        {/* Header */}
+        <div style={{backgroundColor: "#1a1a1a", padding: "60px 0", textAlign: "center"}}>
+            <p style={{color: "#C9A84C", letterSpacing: "4px", fontSize: "0.7rem", fontFamily: "sans-serif", marginBottom: "8px"}}>NUESTRA SELECCIÓN</p>
+            <h1 style={{color: "white", fontFamily: "Georgia, serif", fontWeight: "300", letterSpacing: "6px", fontSize: "2.5rem"}}>CATÁLOGO</h1>
+        </div>
+
+        {/* Grid de productos */}
+        <div className="container py-5">
+            {store.products.length === 0 ? (
+                <p style={{textAlign: "center", color: "#888", fontFamily: "sans-serif", padding: "60px 0"}}>
+                    El catálogo estará disponible pronto.
+                </p>
+            ) : (
+                <div className="row row-cols-1 row-cols-md-3 g-4">
+                    {store.products.map((product) => (
+                        <div key={product.id} className="col">
+                            <div style={{backgroundColor: "white", boxShadow: "0 2px 15px rgba(0,0,0,0.06)", height: "100%", display: "flex", flexDirection: "column"}}>
+                                <img
+                                    src={product.image_url || "https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=600&q=80"}
+                                    style={{width: "100%", height: "220px", objectFit: "cover"}}
+                                />
+                                <div style={{padding: "24px", display: "flex", flexDirection: "column", flexGrow: 1}}>
+                                    <h5 style={{fontFamily: "Georgia, serif", fontWeight: "400", fontSize: "1rem", marginBottom: "8px"}}>
+                                        {product.name}
+                                    </h5>
+                                    <p style={{color: "#888", fontSize: "0.85rem", fontFamily: "sans-serif", flexGrow: 1, marginBottom: "16px"}}>
+                                        {product.description}
+                                    </p>
+                                    <p style={{color: "#C9A84C", fontWeight: "700", fontSize: "1.2rem", fontFamily: "sans-serif", marginBottom: "16px"}}>
+                                        €{product.price}
+                                    </p>
+                                    <div style={{display: "flex", gap: "8px"}}>
+                                        <Link to={`/product/${product.id}`} style={{
+                                            flex: 1,
+                                            textAlign: "center",
+                                            padding: "10px",
+                                            border: "1px solid #1a1a1a",
+                                            color: "#1a1a1a",
+                                            textDecoration: "none",
+                                            fontSize: "0.7rem",
+                                            letterSpacing: "1px",
+                                            fontFamily: "sans-serif"
+                                        }}>VER MÁS</Link>
+                                        <button
+                                            onClick={() => addToCart(product.id)}
+                                            style={{
+                                                flex: 1,
+                                                padding: "10px",
+                                                backgroundColor: "#C9A84C",
+                                                color: "white",
+                                                border: "none",
+                                                fontSize: "0.7rem",
+                                                letterSpacing: "1px",
+                                                fontFamily: "sans-serif",
+                                                cursor: "pointer"
+                                            }}>+ CARRITO</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    ))}
                 </div>
-            ))}
+            )}
         </div>
     </div>
 )

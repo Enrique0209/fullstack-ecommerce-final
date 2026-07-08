@@ -51,41 +51,88 @@ export const Profile = () => {
     }
 
     return (
-    <div className="container d-flex justify-content-center align-items-center" style={{minHeight: "80vh"}}>
-        <div className="card shadow p-5" style={{width: "450px", border: "none"}}>
-            <h2 className="text-center mb-4" style={{fontFamily: "Georgia, serif", letterSpacing: "2px"}}>
-                MI PERFIL
-            </h2>
-            <div className="mb-3">
-                <label className="form-label text-muted">Nombre</label>
-                <input
-                    type="text"
-                    className="form-control"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                />
+    <div style={{backgroundColor: "#F7F5F0", minHeight: "100vh"}}>
+        {/* Header */}
+        <div style={{backgroundColor: "#1a1a1a", padding: "60px 0", textAlign: "center"}}>
+            <p style={{color: "#C9A84C", letterSpacing: "4px", fontSize: "0.7rem", fontFamily: "sans-serif", marginBottom: "8px"}}>TU CUENTA</p>
+            <h1 style={{color: "white", fontFamily: "Georgia, serif", fontWeight: "300", letterSpacing: "6px", fontSize: "2.5rem"}}>MI PERFIL</h1>
+        </div>
+
+        <div style={{display: "flex", justifyContent: "center", padding: "60px 20px"}}>
+            <div style={{
+                backgroundColor: "white",
+                boxShadow: "0 2px 20px rgba(0,0,0,0.08)",
+                padding: "48px",
+                width: "100%",
+                maxWidth: "480px"
+            }}>
+                <div style={{marginBottom: "24px"}}>
+                    <label style={{display: "block", fontSize: "0.7rem", letterSpacing: "2px", fontFamily: "sans-serif", color: "#888", marginBottom: "8px"}}>NOMBRE</label>
+                    <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        style={{
+                            width: "100%",
+                            padding: "12px 0",
+                            border: "none",
+                            borderBottom: "1px solid #ddd",
+                            outline: "none",
+                            fontFamily: "Georgia, serif",
+                            fontSize: "1rem",
+                            backgroundColor: "transparent"
+                        }}
+                    />
+                </div>
+                <div style={{marginBottom: "40px"}}>
+                    <label style={{display: "block", fontSize: "0.7rem", letterSpacing: "2px", fontFamily: "sans-serif", color: "#888", marginBottom: "8px"}}>EMAIL</label>
+                    <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        style={{
+                            width: "100%",
+                            padding: "12px 0",
+                            border: "none",
+                            borderBottom: "1px solid #ddd",
+                            outline: "none",
+                            fontFamily: "Georgia, serif",
+                            fontSize: "1rem",
+                            backgroundColor: "transparent"
+                        }}
+                    />
+                </div>
+                <button
+                    onClick={handleUpdateProfile}
+                    style={{
+                        width: "100%",
+                        padding: "14px",
+                        backgroundColor: "#C9A84C",
+                        color: "white",
+                        border: "none",
+                        fontSize: "0.75rem",
+                        letterSpacing: "3px",
+                        fontFamily: "sans-serif",
+                        cursor: "pointer",
+                        marginBottom: "16px"
+                    }}>GUARDAR CAMBIOS</button>
+
+                <div style={{borderTop: "1px solid #eee", paddingTop: "24px", marginTop: "8px"}}>
+                    <button
+                        onClick={handleDeleteProfile}
+                        style={{
+                            width: "100%",
+                            padding: "12px",
+                            backgroundColor: "transparent",
+                            color: "#cc0000",
+                            border: "1px solid #cc0000",
+                            fontSize: "0.75rem",
+                            letterSpacing: "2px",
+                            fontFamily: "sans-serif",
+                            cursor: "pointer"
+                        }}>ELIMINAR CUENTA</button>
+                </div>
             </div>
-            <div className="mb-4">
-                <label className="form-label text-muted">Email</label>
-                <input
-                    type="email"
-                    className="form-control"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                />
-            </div>
-            <button 
-                onClick={handleUpdateProfile}
-                className="btn w-100 mb-3"
-                style={{backgroundColor: "#C9A84C", color: "white", border: "none"}}>
-                Guardar cambios
-            </button>
-            <hr/>
-            <button 
-                onClick={handleDeleteProfile}
-                className="btn btn-outline-danger w-100">
-                Eliminar cuenta
-            </button>
         </div>
     </div>
 )
