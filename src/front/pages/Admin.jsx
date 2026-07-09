@@ -19,9 +19,10 @@ export const Admin = () => {
     const [categories, setCategories] = useState([])
     const [subcategories, setSubcategories] = useState([])
     const [products, setProducts] = useState([])
+    const [editingProductId, setEditingProductId] = useState(null)
 
     useEffect(() => {
-        if (store.token === null) navigate("/login")
+        if (store.token === null || !store.user?.is_admin) navigate("/login")
         else {
             loadCategories()
             loadSubcategories()
@@ -65,6 +66,29 @@ export const Admin = () => {
         if (response.ok) { setMessage("Subcategoría creada ✓"); setSubcategoryName(""); setCategoryId(""); loadSubcategories() }
     }
 
+    const resetProductForm = () => {
+        setEditingProductId(null)
+        setProductName("")
+        setPrice("")
+        setPriceHoreca("")
+        setDescription("")
+        setStock("")
+        setSubcategoryId("")
+        setImageUrl("")
+    }
+
+    const handleEditClick = (product) => {
+        setEditingProductId(product.id)
+        setProductName(product.name || "")
+        setPrice(product.price ?? "")
+        setPriceHoreca(product.price_horeca ?? "")
+        setDescription(product.description || "")
+        setStock(product.stock ?? "")
+        setSubcategoryId(product.subcategory_id ?? "")
+        setImageUrl(product.image_url || "")
+        window.scrollTo({ top: 0, behavior: "smooth" })
+    }
+
     const handleCreateProduct = async () => {
         const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/admin/product", {
             method: "POST",
@@ -79,7 +103,25 @@ export const Admin = () => {
                 image_url: imageUrl
             })
         })
-        if (response.ok) { setMessage("Producto creado ✓"); setProductName(""); setPrice(""); setPriceHoreca(""); setDescription(""); setStock(""); setSubcategoryId(""); setImageUrl(""); loadProducts() }
+        if (response.ok) { setMessage("Producto creado ✓"); resetProductForm(); loadProducts() }
+    }
+
+    const handleUpdateProduct = async () => {
+        const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/product/" + editingProductId, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + store.token },
+            body: JSON.stringify({
+                name: productName,
+                price: parseFloat(price),
+                price_horeca: parseFloat(priceHoreca),
+                description: description,
+                stock: parseInt(stock),
+                subcategory_id: parseInt(subcategoryId),
+                image_url: imageUrl
+            })
+        })
+        if (response.ok) { setMessage("Producto actualizado ✓"); resetProductForm(); loadProducts() }
+        else { setMessage("Error al actualizar el producto") }
     }
 
     return (
@@ -145,7 +187,14 @@ export const Admin = () => {
                     {/* Productos */}
                     <div className="col-md-4">
                         <div style={{backgroundColor: "white", padding: "32px", boxShadow: "0 2px 15px rgba(0,0,0,0.06)"}}>
-                            <h4 style={{fontFamily: "Georgia, serif", fontWeight: "400", marginBottom: "24px"}}>Nuevo Producto</h4>
+                            <h4 style={{fontFamily: "Georgia, serif", fontWeight: "400", marginBottom: "8px"}}>
+                                {editingProductId ? "Editar Producto" : "Nuevo Producto"}
+                            </h4>
+                            {editingProductId && (
+                                <p style={{fontSize: "0.75rem", color: "#C9A84C", fontFamily: "sans-serif", marginBottom: "16px"}}>
+                                    Editando #{editingProductId} — <span style={{textDecoration: "underline", cursor: "pointer"}} onClick={resetProductForm}>cancelar</span>
+                                </p>
+                            )}
                             {[
                                 {placeholder: "Nombre", value: productName, setter: setProductName},
                                 {placeholder: "Descripción", value: description, setter: setDescription},
@@ -162,8 +211,10 @@ export const Admin = () => {
                                 <option value="">Selecciona subcategoría</option>
                                 {subcategories.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                             </select>
-                            <button onClick={handleCreateProduct} style={{width: "100%", padding: "12px", backgroundColor: "#1a1a1a", color: "white", border: "none", fontFamily: "sans-serif", fontSize: "0.75rem", letterSpacing: "2px", cursor: "pointer"}}>
-                                CREAR PRODUCTO
+                            <button
+                                onClick={editingProductId ? handleUpdateProduct : handleCreateProduct}
+                                style={{width: "100%", padding: "12px", backgroundColor: "#1a1a1a", color: "white", border: "none", fontFamily: "sans-serif", fontSize: "0.75rem", letterSpacing: "2px", cursor: "pointer"}}>
+                                {editingProductId ? "GUARDAR CAMBIOS" : "CREAR PRODUCTO"}
                             </button>
                         </div>
                     </div>
@@ -179,7 +230,10 @@ export const Admin = () => {
                                     <div style={{border: "1px solid #f0f0f0", padding: "16px"}}>
                                         <img src={p.image_url || "https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=200"} style={{width: "100%", height: "100px", objectFit: "cover", marginBottom: "12px"}} />
                                         <p style={{fontFamily: "Georgia, serif", fontSize: "0.9rem", marginBottom: "4px"}}>{p.name}</p>
-                                        <p style={{color: "#C9A84C", fontFamily: "sans-serif", fontSize: "0.85rem", margin: 0}}>€{p.price}</p>
+                                        <p style={{color: "#C9A84C", fontFamily: "sans-serif", fontSize: "0.85rem", margin: "0 0 12px 0"}}>€{p.price}</p>
+                                        <button onClick={() => handleEditClick(p)} style={{width: "100%", padding: "8px", backgroundColor: "transparent", color: "#1a1a1a", border: "1px solid #1a1a1a", fontFamily: "sans-serif", fontSize: "0.7rem", letterSpacing: "1px", cursor: "pointer"}}>
+                                            EDITAR
+                                        </button>
                                     </div>
                                 </div>
                             ))}
