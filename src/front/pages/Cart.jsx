@@ -7,9 +7,7 @@ export const Cart = () => {
 
     const loadCart = async () => {
         const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/cart", {
-            headers: {
-                "Authorization": "Bearer " + store.token
-            }
+            headers: { "Authorization": "Bearer " + store.token }
         })
         if (response.ok) {
             const data = await response.json()
@@ -17,23 +15,39 @@ export const Cart = () => {
         }
     }
 
+    const loadProducts = async () => {
+        const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/product")
+        if (response.ok) {
+            const data = await response.json()
+            dispatch({ type: "set_products", payload: data })
+        }
+    }
+
     const removeFromCart = async (item_id) => {
         const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/cart/" + item_id, {
             method: "DELETE",
-            headers: {
-                "Authorization": "Bearer " + store.token
-            }
+            headers: { "Authorization": "Bearer " + store.token }
         })
         if (response.ok) loadCart()
     }
 
+    const clearCartAfterPayment = async () => {
+        for (const item of store.cart) {
+            await fetch(import.meta.env.VITE_BACKEND_URL + "/api/cart/" + item.id, {
+                method: "DELETE",
+                headers: { "Authorization": "Bearer " + store.token }
+            })
+        }
+        dispatch({ type: "set_cart", payload: [] })
+    }
+
     useEffect(() => {
         loadCart()
+        if (store.products.length === 0) loadProducts()
     }, [])
 
     return (
     <div style={{backgroundColor: "#F7F5F0", minHeight: "100vh"}}>
-        {/* Header */}
         <div style={{backgroundColor: "#1a1a1a", padding: "60px 0", textAlign: "center"}}>
             <p style={{color: "#C9A84C", letterSpacing: "4px", fontSize: "0.7rem", fontFamily: "sans-serif", marginBottom: "8px"}}>TU SELECCIÓN</p>
             <h1 style={{color: "white", fontFamily: "Georgia, serif", fontWeight: "300", letterSpacing: "6px", fontSize: "2.5rem"}}>MI CARRITO</h1>
@@ -80,7 +94,7 @@ export const Cart = () => {
                                             Cantidad: {item.quantity}
                                         </p>
                                         <p style={{color: "#C9A84C", fontWeight: "700", fontFamily: "sans-serif", margin: 0}}>
-                                            €{product ? (product.price * item.quantity).toFixed(2) : ""}
+                                            €{product ? (product.price * item.quantity).toFixed(2) : "0.00"}
                                         </p>
                                     </div>
                                     <button
@@ -98,7 +112,6 @@ export const Cart = () => {
                             )
                         })}
 
-                        {/* Total y PayPal */}
                         <div style={{
                             backgroundColor: "white",
                             boxShadow: "0 2px 15px rgba(0,0,0,0.06)",
@@ -130,6 +143,7 @@ export const Cart = () => {
                                 onApprove={(data, actions) => {
                                     return actions.order.capture().then(() => {
                                         alert("¡Pago completado con éxito!")
+                                        clearCartAfterPayment()
                                     })
                                 }}
                             />

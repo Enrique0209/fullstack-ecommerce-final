@@ -40,15 +40,18 @@ export const Profile = () => {
     }
 
     const handleDeleteProfile = async () => {
-        const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/profile", {
-            method: "DELETE",
-            headers: { "Authorization": "Bearer " + store.token }
-        })
-        if (response.ok) {
-            dispatch({ type: "logout" })
-            navigate("/login")
-        }
+    const confirmed = window.confirm("¿Seguro que quieres eliminar tu cuenta? Esta acción no se puede deshacer.")
+    if (!confirmed) return
+
+    const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/profile", {
+        method: "DELETE",
+        headers: { "Authorization": "Bearer " + store.token }
+    })
+    if (response.ok) {
+        dispatch({ type: "logout" })
+        navigate("/login")
     }
+}
 
     return (
     <div style={{backgroundColor: "#F7F5F0", minHeight: "100vh"}}>

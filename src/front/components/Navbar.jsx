@@ -1,9 +1,26 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import useGlobalReducer from "../hooks/useGlobalReducer";
 
 export const Navbar = () => {
     const { store, dispatch } = useGlobalReducer()
     const navigate = useNavigate()
+
+    const loadCart = async () => {
+        const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/cart", {
+            headers: { "Authorization": "Bearer " + store.token }
+        })
+        if (response.ok) {
+            const data = await response.json()
+            dispatch({ type: "set_cart", payload: data })
+        }
+    }
+
+    useEffect(() => {
+        if (store.token) loadCart()
+    }, [store.token])
+
+    const cartCount = store.cart.reduce((sum, item) => sum + item.quantity, 0)
 
     const handleLogout = () => {
         dispatch({ type: "logout" })
@@ -36,7 +53,26 @@ export const Navbar = () => {
 
             <div style={{display: "flex", alignItems: "center", gap: "32px"}}>
                 <Link to="/catalog" style={{color: "white", textDecoration: "none", fontSize: "0.75rem", letterSpacing: "2px", fontFamily: "sans-serif"}}>CATÁLOGO</Link>
-                <Link to="/cart" style={{color: "white", textDecoration: "none", fontSize: "0.75rem", letterSpacing: "2px", fontFamily: "sans-serif"}}>🛒 CARRITO</Link>
+
+                <Link to="/cart" style={{color: "white", textDecoration: "none", fontSize: "0.75rem", letterSpacing: "2px", fontFamily: "sans-serif", position: "relative"}}>
+                    🛒 CARRITO
+                    {cartCount > 0 && (
+                        <span style={{
+                            backgroundColor: "#C9A84C",
+                            color: "white",
+                            borderRadius: "50%",
+                            width: "18px",
+                            height: "18px",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "0.65rem",
+                            marginLeft: "6px",
+                            position: "relative",
+                            top: "-1px"
+                        }}>{cartCount}</span>
+                    )}
+                </Link>
 
                 {store.token && (
                     <Link to="/profile" style={{color: "white", textDecoration: "none", fontSize: "0.75rem", letterSpacing: "2px", fontFamily: "sans-serif"}}>PERFIL</Link>

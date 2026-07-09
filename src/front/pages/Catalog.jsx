@@ -1,9 +1,10 @@
-import React, { useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import useGlobalReducer from "../hooks/useGlobalReducer"
 import { Link } from "react-router-dom"
 
 export const Catalog = () => {
     const { store, dispatch } = useGlobalReducer()
+    const [toastMessage, setToastMessage] = useState(null)
 
     const loadProducts = async () => {
         const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/product")
@@ -15,6 +16,16 @@ export const Catalog = () => {
         loadProducts()
     }, [])
 
+    useEffect(() => {
+        if (toastMessage === null) return
+
+        const timer = setTimeout(() => {
+            setToastMessage(null)
+        }, 2500)
+
+        return () => clearTimeout(timer)
+    }, [toastMessage])
+
     const addToCart = async (product_id) => {
         const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/cart", {
             method: "POST",
@@ -24,14 +35,44 @@ export const Catalog = () => {
             },
             body: JSON.stringify({ product_id: product_id, quantity: 1 })
         })
+
         if (response.ok) {
-            alert("Producto agregado al carrito")
+            const cartResponse = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/cart", {
+                headers: { "Authorization": "Bearer " + store.token }
+            })
+            if (cartResponse.ok) {
+                const cartData = await cartResponse.json()
+                dispatch({ type: "set_cart", payload: cartData })
+            }
+            setToastMessage("✓ Producto agregado al carrito")
+        } else {
+            setToastMessage("Debes iniciar sesión para agregar productos")
         }
         return response.ok
     }
 
     return (
-    <div style={{backgroundColor: "#F7F5F0", minHeight: "100vh"}}>
+    <div style={{backgroundColor: "#F7F5F0", minHeight: "100vh", position: "relative"}}>
+        {toastMessage && (
+            <div style={{
+                position: "fixed",
+                top: "80px",
+                right: "24px",
+                backgroundColor: "#1a1a1a",
+                color: "white",
+                padding: "14px 24px",
+                fontFamily: "sans-serif",
+                fontSize: "0.85rem",
+                letterSpacing: "0.5px",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+                zIndex: 2000,
+                borderLeft: "3px solid #C9A84C",
+                animation: "fadeInOut 2.5s ease forwards"
+            }}>
+                {toastMessage}
+            </div>
+        )}
+
         {/* Header */}
         <div style={{backgroundColor: "#1a1a1a", padding: "60px 0", textAlign: "center"}}>
             <p style={{color: "#C9A84C", letterSpacing: "4px", fontSize: "0.7rem", fontFamily: "sans-serif", marginBottom: "8px"}}>NUESTRA SELECCIÓN</p>
