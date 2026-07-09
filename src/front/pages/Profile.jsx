@@ -45,7 +45,7 @@ export const Profile = () => {
             headers: { "Authorization": "Bearer " + store.token }
         })
         if (response.ok) {
-            dispatch({ type: "set_user", payload: { user: null, token: null } })
+            dispatch({ type: "logout" })
             navigate("/login")
         }
     }

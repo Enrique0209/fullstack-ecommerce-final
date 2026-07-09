@@ -37,10 +37,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 MIGRATE = Migrate(app, db, compare_type=True)
 db.init_app(app)
 
-# add the admin
-setup_admin(app)
-
-# add the admin
 if ENV == "development":
     setup_admin(app)
 
