@@ -26,13 +26,21 @@ export default function storeReducer(store, action = {}) {
         token: action.payload.token,
     };
 
+    case "logout":
+      localStorage.removeItem("token")
+      localStorage.removeItem("user")
+      return {
+        ...store,
+        user: null,
+        token: null,
+        cart: [],
+      };
+
     case "set_cart":
       return {
         ...store,
         cart: action.payload,
       };
-
-    
 
     case "add_task":
       const { id, color } = action.payload;
