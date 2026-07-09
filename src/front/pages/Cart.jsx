@@ -31,6 +31,22 @@ export const Cart = () => {
         if (response.ok) loadCart()
     }
 
+    const updateQuantity = async (item, newQuantity) => {
+        if (newQuantity < 1) {
+            removeFromCart(item.id)
+            return
+        }
+        const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/cart/" + item.id, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + store.token
+            },
+            body: JSON.stringify({ quantity: newQuantity })
+        })
+        if (response.ok) loadCart()
+    }
+
     const clearCartAfterPayment = async () => {
         for (const item of store.cart) {
             await fetch(import.meta.env.VITE_BACKEND_URL + "/api/cart/" + item.id, {
@@ -48,10 +64,17 @@ export const Cart = () => {
 
     return (
     <div style={{backgroundColor: "#F7F5F0", minHeight: "100vh"}}>
-        <div style={{backgroundColor: "#1a1a1a", padding: "60px 0", textAlign: "center"}}>
-            <p style={{color: "#C9A84C", letterSpacing: "4px", fontSize: "0.7rem", fontFamily: "sans-serif", marginBottom: "8px"}}>TU SELECCIÓN</p>
-            <h1 style={{color: "white", fontFamily: "Georgia, serif", fontWeight: "300", letterSpacing: "6px", fontSize: "2.5rem"}}>MI CARRITO</h1>
+        <div style={{backgroundColor: "#1a1a1a", padding: "14px 0"}}>
+    <div className="container d-flex justify-content-between align-items-center">
+        <div style={{display: "flex", alignItems: "baseline", gap: "10px"}}>
+            <h1 style={{color: "white", fontFamily: "Georgia, serif", fontWeight: "400", letterSpacing: "0.5px", fontSize: "1.1rem", margin: 0}}>Mi Carrito</h1>
+            <span style={{color: "#C9A84C", letterSpacing: "2px", fontSize: "0.6rem", fontFamily: "sans-serif"}}>TU SELECCIÓN</span>
         </div>
+        <p style={{color: "#666", fontFamily: "sans-serif", fontSize: "0.7rem", margin: 0}}>
+            {store.cart.length} producto{store.cart.length !== 1 ? "s" : ""}
+        </p>
+    </div>
+</div>
 
         <div className="container py-5">
             {store.cart.length === 0 ? (
@@ -64,7 +87,8 @@ export const Cart = () => {
                         textDecoration: "none",
                         fontSize: "0.75rem",
                         letterSpacing: "2px",
-                        fontFamily: "sans-serif"
+                        fontFamily: "sans-serif",
+                        borderRadius: "6px"
                     }}>VER CATÁLOGO</a>
                 </div>
             ) : (
@@ -73,26 +97,58 @@ export const Cart = () => {
                         {store.cart.map((item) => {
                             const product = store.products.find(p => p.id === item.product_id)
                             return (
-                                <div key={item.id} style={{
-                                    backgroundColor: "white",
-                                    boxShadow: "0 2px 15px rgba(0,0,0,0.06)",
-                                    marginBottom: "16px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    padding: "20px 24px",
-                                    gap: "20px"
-                                }}>
+                                <div key={item.id} className="cart-item-row" style={{
+    backgroundColor: "white",
+    boxShadow: "0 2px 15px rgba(0,0,0,0.06)",
+    marginBottom: "16px",
+    display: "flex",
+    alignItems: "center",
+    padding: "20px 24px",
+    gap: "20px",
+    borderRadius: "10px"
+}}>
                                     <img
                                         src={product?.image_url || "https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=200&q=80"}
-                                        style={{width: "80px", height: "80px", objectFit: "cover"}}
+                                        style={{width: "80px", height: "80px", objectFit: "contain", backgroundColor: "#F7F5F0", borderRadius: "8px", padding: "6px"}}
                                     />
                                     <div style={{flexGrow: 1}}>
-                                        <h5 style={{fontFamily: "Georgia, serif", fontWeight: "400", fontSize: "1rem", marginBottom: "4px"}}>
+                                        <h5 style={{fontFamily: "Georgia, serif", fontWeight: "400", fontSize: "1rem", marginBottom: "8px"}}>
                                             {product ? product.name : "Producto"}
                                         </h5>
-                                        <p style={{color: "#888", fontSize: "0.85rem", fontFamily: "sans-serif", marginBottom: "4px"}}>
-                                            Cantidad: {item.quantity}
-                                        </p>
+                                        <div style={{display: "flex", alignItems: "center", gap: "12px", marginBottom: "6px"}}>
+                                            <div style={{display: "flex", alignItems: "center", border: "1px solid #EDE9E0", borderRadius: "20px"}}>
+                                                <button
+                                                    onClick={() => updateQuantity(item, item.quantity - 1)}
+                                                    style={{
+                                                        width: "26px",
+                                                        height: "26px",
+                                                        border: "none",
+                                                        backgroundColor: "transparent",
+                                                        color: "#1a1a1a",
+                                                        fontFamily: "sans-serif",
+                                                        fontSize: "0.9rem",
+                                                        cursor: "pointer"
+                                                    }}>−</button>
+                                                <span style={{
+                                                    minWidth: "24px",
+                                                    textAlign: "center",
+                                                    fontFamily: "sans-serif",
+                                                    fontSize: "0.85rem"
+                                                }}>{item.quantity}</span>
+                                                <button
+                                                    onClick={() => updateQuantity(item, item.quantity + 1)}
+                                                    style={{
+                                                        width: "26px",
+                                                        height: "26px",
+                                                        border: "none",
+                                                        backgroundColor: "transparent",
+                                                        color: "#1a1a1a",
+                                                        fontFamily: "sans-serif",
+                                                        fontSize: "0.9rem",
+                                                        cursor: "pointer"
+                                                    }}>+</button>
+                                            </div>
+                                        </div>
                                         <p style={{color: "#C9A84C", fontWeight: "700", fontFamily: "sans-serif", margin: 0}}>
                                             €{product ? (product.price * item.quantity).toFixed(2) : "0.00"}
                                         </p>
@@ -102,6 +158,7 @@ export const Cart = () => {
                                         style={{
                                             backgroundColor: "transparent",
                                             border: "1px solid #ddd",
+                                            borderRadius: "20px",
                                             color: "#888",
                                             padding: "6px 14px",
                                             fontSize: "0.75rem",
@@ -116,7 +173,8 @@ export const Cart = () => {
                             backgroundColor: "white",
                             boxShadow: "0 2px 15px rgba(0,0,0,0.06)",
                             padding: "28px 24px",
-                            marginTop: "8px"
+                            marginTop: "8px",
+                            borderRadius: "10px"
                         }}>
                             <div style={{display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px"}}>
                                 <span style={{fontFamily: "Georgia, serif", fontSize: "1.1rem"}}>TOTAL</span>

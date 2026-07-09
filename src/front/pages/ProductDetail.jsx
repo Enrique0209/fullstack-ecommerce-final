@@ -42,6 +42,8 @@ export const ProductDetail = () => {
         }
     }
 
+    const outOfStock = product && product.stock <= 0
+
     return (
     <div className="container py-5" style={{position: "relative"}}>
         {toastMessage && (
@@ -58,6 +60,7 @@ export const ProductDetail = () => {
                 boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
                 zIndex: 2000,
                 borderLeft: "3px solid #C9A84C",
+                borderRadius: "4px",
                 animation: "fadeInOut 2.5s ease forwards"
             }}>
                 {toastMessage}
@@ -67,12 +70,22 @@ export const ProductDetail = () => {
         {product ? (
             <div className="row justify-content-center">
                 <div className="col-md-8">
-                    <div className="card shadow" style={{border: "none"}}>
-                        <img 
-                            src={product.image_url || "https://placehold.co/800x400?text=Sin+imagen"}
-                            className="card-img-top"
-                            style={{height: "150px", objectFit: "cover"}}
-                        />
+                    <div className="card shadow" style={{border: "none", borderRadius: "12px", overflow: "hidden"}}>
+                        <div style={{
+                            width: "100%",
+                            height: "320px",
+                            backgroundColor: "#FFFFFF",
+                            borderBottom: "1px solid #EDE9E0",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: "32px"
+                        }}>
+                            <img 
+                                src={product.image_url || "https://placehold.co/800x400?text=Sin+imagen"}
+                                style={{maxWidth: "100%", maxHeight: "100%", objectFit: "contain"}}
+                            />
+                        </div>
                         <div className="card-body p-5">
                             <h1 style={{fontFamily: "Georgia, serif"}}>{product.name}</h1>
                             <p className="text-muted lead">{product.description}</p>
@@ -84,14 +97,21 @@ export const ProductDetail = () => {
                                 </div>
                                 <div>
                                     <p className="mb-0 text-muted">Stock disponible</p>
-                                    <h5>{product.stock} unidades</h5>
+                                    <h5>{outOfStock ? "Agotado" : `${product.stock} unidades`}</h5>
                                 </div>
                             </div>
                             <button 
                                 onClick={() => addToCart(product.id)}
+                                disabled={outOfStock}
                                 className="btn w-100 btn-lg"
-                                style={{backgroundColor: "#C9A84C", color: "white", border: "none"}}>
-                                Agregar al carrito
+                                style={{
+                                    backgroundColor: outOfStock ? "#ddd" : "#C9A84C",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: "6px",
+                                    cursor: outOfStock ? "not-allowed" : "pointer"
+                                }}>
+                                {outOfStock ? "Sin stock" : "Agregar al carrito"}
                             </button>
                         </div>
                     </div>

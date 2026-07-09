@@ -195,6 +195,23 @@ def remove_from_cart(item_id):
     db.session.commit()
     return jsonify({"message": "Producto eliminado del carrito exitosamente :)"}), 200
 
+@api.route('/cart/<int:item_id>', methods=['PUT'])
+@jwt_required()
+def update_cart_item(item_id):
+    user_id = get_jwt_identity()
+    item = CarItem.query.filter_by(id=item_id, user_id=user_id).first()
+    if item is None:
+        return jsonify({"message": "Item no encontrado en el carrito"}), 404
+
+    body = request.get_json()
+    quantity = body.get("quantity")
+    if quantity is None or quantity < 1:
+        return jsonify({"message": "Cantidad inválida"}), 400
+
+    item.quantity = quantity
+    db.session.commit()
+    return jsonify({"message": "Cantidad actualizada exitosamente :)"}), 200
+
 
 # ─── PERFIL DE USUARIO ────────────────────────────────────────────────────────
 

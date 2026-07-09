@@ -17,9 +17,40 @@ button {
     font-family: inherit;
 }
 
+/* Estilos del catalago de productos */
+.product-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+/* Agregado al carrito desvaneciéndose */
 @keyframes fadeInOut {
     0% { opacity: 0; transform: translateY(-10px); }
     10% { opacity: 1; transform: translateY(0); }
     85% { opacity: 1; }
     100% { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Mejora de diseño  */
+.app-input {
+    transition: border-color 0.2s ease;
+}
+
+.app-input:focus {
+    border-color: #C9A84C !important;
+    outline: none;
+}
+
+/* hover de carrito de compras */
+
+.cart-item-row {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cart-item-row:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
 }

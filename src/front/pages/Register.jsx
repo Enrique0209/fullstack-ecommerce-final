@@ -45,51 +45,55 @@ export const Register = () => {
 
     return (
     <div className="container d-flex justify-content-center align-items-center" style={{minHeight: "80vh"}}>
-        <div className="card shadow p-5" style={{width: "400px", border: "none"}}>
+        <div className="card shadow p-5" style={{width: "400px", border: "none", borderRadius: "12px"}}>
             <h2 className="text-center mb-4" style={{fontFamily: "Georgia, serif", letterSpacing: "2px"}}>
                 REGISTRO
             </h2>
-            {error && <div className="alert alert-danger">{error}</div>}
+            {error && <div className="alert alert-danger" style={{borderRadius: "8px"}}>{error}</div>}
             <div className="mb-3">
                 <input
                     type="text"
-                    className="form-control"
+                    className="form-control app-input"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Tu nombre"
+                    style={{borderRadius: "6px"}}
                 />
             </div>
             <div className="mb-3">
                 <input
                     type="email"
-                    className="form-control"
+                    className="form-control app-input"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Tu email"
+                    style={{borderRadius: "6px"}}
                 />
             </div>
             <div className="mb-3">
                 <input
                     type="password"
-                    className="form-control"
+                    className="form-control app-input"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Tu contraseña"
+                    style={{borderRadius: "6px"}}
                 />
             </div>
             <div className="mb-3">
                 <input
                     type="password"
-                    className="form-control"
+                    className="form-control app-input"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Confirma tu contraseña"
+                    style={{borderRadius: "6px"}}
                 />
             </div>
             <button 
                 onClick={handleRegister} 
                 className="btn w-100 mb-3"
-                style={{backgroundColor: "#C9A84C", color: "white", border: "none"}}>
+                style={{backgroundColor: "#C9A84C", color: "white", border: "none", borderRadius: "6px"}}>
                 Registrarse
             </button>
             <p className="text-center text-muted">
