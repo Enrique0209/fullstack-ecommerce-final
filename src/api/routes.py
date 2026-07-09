@@ -70,23 +70,6 @@ def get_products():
     return jsonify(serialized_products), 200
 
 
-@api.route('/product', methods=['POST'])
-def create_product():
-    body = request.get_json()
-    name = body.get("name")
-    price = body.get("price")
-    price_horeca = body.get("price_horeca")
-    description = body.get("description")
-    stock = body.get("stock")
-    subcategory_id = body.get("subcategory_id")
-    new_product = Product(name=name, price=price, price_horeca=price_horeca,
-                          description=description, stock=stock,
-                          subcategory_id=subcategory_id)
-    db.session.add(new_product)
-    db.session.commit()
-    return jsonify({"message": "Producto creado exitosamente :)"}), 201
-
-
 @api.route('/product/<int:product_id>', methods=['GET'])
 def get_product(product_id):
     product = Product.query.get(product_id)
@@ -96,10 +79,17 @@ def get_product(product_id):
 
 
 @api.route('/product/<int:product_id>', methods=['PUT'])
+@jwt_required()
 def update_product(product_id):
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    if not user.is_admin:
+        return jsonify({"message": "Acceso denegado"}), 403
+
     product = Product.query.get(product_id)
     if product is None:
         return jsonify({"message": "Producto no encontrado"}), 404
+
     body = request.get_json()
     product.name = body.get("name", product.name)
     product.price = body.get("price", product.price)
@@ -107,6 +97,7 @@ def update_product(product_id):
     product.description = body.get("description", product.description)
     product.stock = body.get("stock", product.stock)
     product.subcategory_id = body.get("subcategory_id", product.subcategory_id)
+    product.image_url = body.get("image_url", product.image_url)
     db.session.commit()
     return jsonify({"message": "Producto actualizado exitosamente :)"}), 200
 
@@ -269,9 +260,10 @@ def admin_create_product():
     description = body.get("description")
     stock = body.get("stock")
     subcategory_id = body.get("subcategory_id")
+    image_url = body.get("image_url")
     new_product = Product(name=name, price=price, price_horeca=price_horeca,
                           description=description, stock=stock,
-                          subcategory_id=subcategory_id)
+                          subcategory_id=subcategory_id, image_url=image_url)
     db.session.add(new_product)
     db.session.commit()
     return jsonify({"message": "Producto creado exitosamente :)"}), 201
