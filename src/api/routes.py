@@ -34,6 +34,14 @@ def register():
     email = body.get("email")
     password = body.get("password")
     name = body.get("name")
+
+    if not email or not password or not name:
+        return jsonify({"message": "Faltan campos obligatorios"}), 400
+
+    existing_user = User.query.filter_by(email=email).first()
+    if existing_user is not None:
+        return jsonify({"message": "Ya existe una cuenta con este email"}), 409
+
     password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
     new_user = User(email=email, password=password_hash, name=name)
     db.session.add(new_user)

@@ -6,30 +6,42 @@ export const Register = () => {
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
+    const [confirmPassword, setConfirmPassword] = useState("")
     const { dispatch } = useGlobalReducer()
     const navigate = useNavigate()
     const [error, setError] = useState("")
 
-    const handleRegister = async () => {
-        if (!name) { setError("El nombre es obligatorio"); return }
-        if (!email.includes("@")) { setError("Email no tiene un formato válido"); return }
-        if (password.length < 6) { setError("La contraseña debe tener mínimo 6 caracteres"); return }
-        const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/register", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ name, email, password }),
-        })
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/
 
-        if (response.ok) {
-            navigate("/login")
-        } else {
-            console.error("Error al registrarse")
+    const handleRegister = async () => {
+        setError("")
+
+        if (!name.trim()) { setError("El nombre es obligatorio"); return }
+        if (!emailRegex.test(email)) { setError("Ingresa un email válido (ej: nombre@dominio.com)"); return }
+        if (!passwordRegex.test(password)) {
+            setError("La contraseña debe tener mínimo 6 caracteres, con al menos una letra y un número")
+            return
+        }
+        if (password !== confirmPassword) { setError("Las contraseñas no coinciden"); return }
+
+        try {
+            const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email, password }),
+            })
+
+            if (response.ok) {
+                navigate("/login")
+            } else {
+                const data = await response.json()
+                setError(data.message || "Error al registrarse")
+            }
+        } catch (err) {
+            setError("No se pudo conectar con el servidor")
         }
     }
-
-
 
     return (
     <div className="container d-flex justify-content-center align-items-center" style={{minHeight: "80vh"}}>
@@ -63,6 +75,15 @@ export const Register = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Tu contraseña"
+                />
+            </div>
+            <div className="mb-3">
+                <input
+                    type="password"
+                    className="form-control"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirma tu contraseña"
                 />
             </div>
             <button 

@@ -9,27 +9,31 @@ export const Login = () => {
     const navigate = useNavigate()
     const [error, setError] = useState("")
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
     const handleLogin = async () => {
-        // aquí va la lógica
-        if (!email.includes("@")) { setError("Email no tiene un formato válido"); return }
-        if (password.length < 6) { setError("La contraseña debe tener mínimo 6 caracteres"); return }
-        const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email, password }),
-        })
+        setError("")
 
-        if (response.ok) {
-    const data = await response.json()
-    dispatch({ type: "set_user", payload: { user: data.user, token: data.token } })
-    navigate("/catalog")
-} else {
-    setError("Email o contraseña incorrectos")
-}
+        if (!emailRegex.test(email)) { setError("Ingresa un email válido"); return }
+        if (!password) { setError("Ingresa tu contraseña"); return }
 
+        try {
+            const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            })
+
+            if (response.ok) {
+                const data = await response.json()
+                dispatch({ type: "set_user", payload: { user: data.user, token: data.token } })
+                navigate("/catalog")
+            } else {
+                setError("Email o contraseña incorrectos")
+            }
+        } catch (err) {
+            setError("No se pudo conectar con el servidor")
+        }
     }
 
     return (
