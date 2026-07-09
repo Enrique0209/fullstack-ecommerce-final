@@ -34,7 +34,7 @@ export const Home = () => {
                     Distribuidores de destilados mexicanos · Madrid
                 </p>
                 <h1 style={{fontSize: "clamp(2.5rem, 6vw, 5rem)", fontWeight: "300", letterSpacing: "6px", marginBottom: "20px", lineHeight: 1.1}}>
-                    IN VINO VERITAS
+                    SPIRITS SHOP
                 </h1>
                 <p style={{fontSize: "1rem", opacity: "0.8", maxWidth: "480px", marginBottom: "40px", fontFamily: "sans-serif", fontWeight: "300", lineHeight: 1.8}}>
                     Mezcales, tequilas y destilados de autor seleccionados para los paladares más exigentes de España

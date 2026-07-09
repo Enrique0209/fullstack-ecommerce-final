@@ -16,10 +16,36 @@ export const Admin = () => {
     const [subcategoryId, setSubcategoryId] = useState("")
     const [imageUrl, setImageUrl] = useState("")
     const [message, setMessage] = useState("")
+    const [categories, setCategories] = useState([])
+    const [subcategories, setSubcategories] = useState([])
+    const [products, setProducts] = useState([])
 
     useEffect(() => {
         if (store.token === null) navigate("/login")
+        else {
+            loadCategories()
+            loadSubcategories()
+            loadProducts()
+        }
     }, [store.token])
+
+    const loadCategories = async () => {
+        const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/category")
+        const data = await response.json()
+        if (response.ok) setCategories(data)
+    }
+
+    const loadSubcategories = async () => {
+        const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/subcategory")
+        const data = await response.json()
+        if (response.ok) setSubcategories(data)
+    }
+
+    const loadProducts = async () => {
+        const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/product")
+        const data = await response.json()
+        if (response.ok) setProducts(data)
+    }
 
     const handleCreateCategory = async () => {
         const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/admin/category", {
@@ -27,7 +53,7 @@ export const Admin = () => {
             headers: { "Content-Type": "application/json", "Authorization": "Bearer " + store.token },
             body: JSON.stringify({ name: categoryName })
         })
-        if (response.ok) setMessage("Categoría creada ✓")
+        if (response.ok) { setMessage("Categoría creada ✓"); setCategoryName(""); loadCategories() }
     }
 
     const handleCreateSubcategory = async () => {
@@ -36,7 +62,7 @@ export const Admin = () => {
             headers: { "Content-Type": "application/json", "Authorization": "Bearer " + store.token },
             body: JSON.stringify({ name: subcategoryName, category_id: parseInt(categoryId) })
         })
-        if (response.ok) setMessage("Subcategoría creada ✓")
+        if (response.ok) { setMessage("Subcategoría creada ✓"); setSubcategoryName(""); setCategoryId(""); loadSubcategories() }
     }
 
     const handleCreateProduct = async () => {
@@ -44,47 +70,122 @@ export const Admin = () => {
             method: "POST",
             headers: { "Content-Type": "application/json", "Authorization": "Bearer " + store.token },
             body: JSON.stringify({
-                name: productName, price: parseFloat(price), price_horeca: parseFloat(priceHoreca),
-                description, stock: parseInt(stock), subcategory_id: parseInt(subcategoryId), image_url: imageUrl
+                name: productName,
+                price: parseFloat(price),
+                price_horeca: parseFloat(priceHoreca),
+                description: description,
+                stock: parseInt(stock),
+                subcategory_id: parseInt(subcategoryId),
+                image_url: imageUrl
             })
         })
-        if (response.ok) setMessage("Producto creado ✓")
+        if (response.ok) { setMessage("Producto creado ✓"); setProductName(""); setPrice(""); setPriceHoreca(""); setDescription(""); setStock(""); setSubcategoryId(""); setImageUrl(""); loadProducts() }
     }
 
     return (
-        <div className="container py-5">
-            <h1 className="text-center mb-5" style={{fontFamily: "Georgia, serif"}}>PANEL ADMIN</h1>
-            {message && <div className="alert alert-success">{message}</div>}
-
-            <div className="card shadow p-4 mb-4" style={{border: "none"}}>
-                <h4>Nueva Categoría</h4>
-                <input className="form-control mb-3" placeholder="Nombre de categoría"
-                    value={categoryName} onChange={(e) => setCategoryName(e.target.value)} />
-                <button className="btn" style={{backgroundColor: "#C9A84C", color: "white"}}
-                    onClick={handleCreateCategory}>Crear Categoría</button>
+        <div style={{backgroundColor: "#F7F5F0", minHeight: "100vh"}}>
+            <div style={{backgroundColor: "#1a1a1a", padding: "60px 0", textAlign: "center"}}>
+                <p style={{color: "#C9A84C", letterSpacing: "4px", fontSize: "0.7rem", fontFamily: "sans-serif", marginBottom: "8px"}}>GESTIÓN</p>
+                <h1 style={{color: "white", fontFamily: "Georgia, serif", fontWeight: "300", letterSpacing: "6px", fontSize: "2.5rem"}}>PANEL ADMIN</h1>
             </div>
 
-            <div className="card shadow p-4 mb-4" style={{border: "none"}}>
-                <h4>Nueva Subcategoría</h4>
-                <input className="form-control mb-3" placeholder="Nombre de subcategoría"
-                    value={subcategoryName} onChange={(e) => setSubcategoryName(e.target.value)} />
-                <input className="form-control mb-3" placeholder="ID de categoría"
-                    value={categoryId} onChange={(e) => setCategoryId(e.target.value)} />
-                <button className="btn" style={{backgroundColor: "#C9A84C", color: "white"}}
-                    onClick={handleCreateSubcategory}>Crear Subcategoría</button>
-            </div>
+            <div className="container py-5">
+                {message && <div style={{backgroundColor: "#C9A84C", color: "white", padding: "12px 24px", marginBottom: "24px", fontFamily: "sans-serif", fontSize: "0.85rem"}}>{message}</div>}
 
-            <div className="card shadow p-4 mb-4" style={{border: "none"}}>
-                <h4>Nuevo Producto</h4>
-                <input className="form-control mb-3" placeholder="Nombre" value={productName} onChange={(e) => setProductName(e.target.value)} />
-                <input className="form-control mb-3" placeholder="Descripción" value={description} onChange={(e) => setDescription(e.target.value)} />
-                <input className="form-control mb-3" placeholder="Precio" value={price} onChange={(e) => setPrice(e.target.value)} />
-                <input className="form-control mb-3" placeholder="Precio HORECA" value={priceHoreca} onChange={(e) => setPriceHoreca(e.target.value)} />
-                <input className="form-control mb-3" placeholder="Stock" value={stock} onChange={(e) => setStock(e.target.value)} />
-                <input className="form-control mb-3" placeholder="ID Subcategoría" value={subcategoryId} onChange={(e) => setSubcategoryId(e.target.value)} />
-                <input className="form-control mb-3" placeholder="URL imagen" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
-                <button className="btn" style={{backgroundColor: "#C9A84C", color: "white"}}
-                    onClick={handleCreateProduct}>Crear Producto</button>
+                <div className="row g-4">
+                    {/* Categorías */}
+                    <div className="col-md-4">
+                        <div style={{backgroundColor: "white", padding: "32px", boxShadow: "0 2px 15px rgba(0,0,0,0.06)"}}>
+                            <h4 style={{fontFamily: "Georgia, serif", fontWeight: "400", marginBottom: "24px"}}>Nueva Categoría</h4>
+                            <input style={{width: "100%", padding: "10px 0", border: "none", borderBottom: "1px solid #ddd", marginBottom: "20px", fontFamily: "sans-serif", outline: "none", backgroundColor: "transparent"}}
+                                placeholder="Nombre" value={categoryName} onChange={(e) => setCategoryName(e.target.value)} />
+                            <button onClick={handleCreateCategory} style={{width: "100%", padding: "12px", backgroundColor: "#C9A84C", color: "white", border: "none", fontFamily: "sans-serif", fontSize: "0.75rem", letterSpacing: "2px", cursor: "pointer"}}>
+                                CREAR
+                            </button>
+                            {categories.length > 0 && (
+                                <div style={{marginTop: "24px"}}>
+                                    <p style={{fontSize: "0.7rem", letterSpacing: "2px", color: "#888", fontFamily: "sans-serif", marginBottom: "12px"}}>CATEGORÍAS EXISTENTES</p>
+                                    {categories.map(c => (
+                                        <div key={c.id} style={{padding: "8px 0", borderBottom: "1px solid #f0f0f0", fontFamily: "sans-serif", fontSize: "0.85rem"}}>
+                                            <span style={{color: "#C9A84C", marginRight: "8px"}}>#{c.id}</span>{c.name}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Subcategorías */}
+                    <div className="col-md-4">
+                        <div style={{backgroundColor: "white", padding: "32px", boxShadow: "0 2px 15px rgba(0,0,0,0.06)"}}>
+                            <h4 style={{fontFamily: "Georgia, serif", fontWeight: "400", marginBottom: "24px"}}>Nueva Subcategoría</h4>
+                            <input style={{width: "100%", padding: "10px 0", border: "none", borderBottom: "1px solid #ddd", marginBottom: "16px", fontFamily: "sans-serif", outline: "none", backgroundColor: "transparent"}}
+                                placeholder="Nombre" value={subcategoryName} onChange={(e) => setSubcategoryName(e.target.value)} />
+                            <select style={{width: "100%", padding: "10px 0", border: "none", borderBottom: "1px solid #ddd", marginBottom: "20px", fontFamily: "sans-serif", outline: "none", backgroundColor: "transparent"}}
+                                value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+                                <option value="">Selecciona categoría</option>
+                                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                            </select>
+                            <button onClick={handleCreateSubcategory} style={{width: "100%", padding: "12px", backgroundColor: "#C9A84C", color: "white", border: "none", fontFamily: "sans-serif", fontSize: "0.75rem", letterSpacing: "2px", cursor: "pointer"}}>
+                                CREAR
+                            </button>
+                            {subcategories.length > 0 && (
+                                <div style={{marginTop: "24px"}}>
+                                    <p style={{fontSize: "0.7rem", letterSpacing: "2px", color: "#888", fontFamily: "sans-serif", marginBottom: "12px"}}>SUBCATEGORÍAS EXISTENTES</p>
+                                    {subcategories.map(s => (
+                                        <div key={s.id} style={{padding: "8px 0", borderBottom: "1px solid #f0f0f0", fontFamily: "sans-serif", fontSize: "0.85rem"}}>
+                                            <span style={{color: "#C9A84C", marginRight: "8px"}}>#{s.id}</span>{s.name}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Productos */}
+                    <div className="col-md-4">
+                        <div style={{backgroundColor: "white", padding: "32px", boxShadow: "0 2px 15px rgba(0,0,0,0.06)"}}>
+                            <h4 style={{fontFamily: "Georgia, serif", fontWeight: "400", marginBottom: "24px"}}>Nuevo Producto</h4>
+                            {[
+                                {placeholder: "Nombre", value: productName, setter: setProductName},
+                                {placeholder: "Descripción", value: description, setter: setDescription},
+                                {placeholder: "Precio €", value: price, setter: setPrice},
+                                {placeholder: "Precio HORECA €", value: priceHoreca, setter: setPriceHoreca},
+                                {placeholder: "Stock", value: stock, setter: setStock},
+                                {placeholder: "URL imagen", value: imageUrl, setter: setImageUrl},
+                            ].map((field, i) => (
+                                <input key={i} style={{width: "100%", padding: "10px 0", border: "none", borderBottom: "1px solid #ddd", marginBottom: "12px", fontFamily: "sans-serif", outline: "none", backgroundColor: "transparent"}}
+                                    placeholder={field.placeholder} value={field.value} onChange={(e) => field.setter(e.target.value)} />
+                            ))}
+                            <select style={{width: "100%", padding: "10px 0", border: "none", borderBottom: "1px solid #ddd", marginBottom: "20px", fontFamily: "sans-serif", outline: "none", backgroundColor: "transparent"}}
+                                value={subcategoryId} onChange={(e) => setSubcategoryId(e.target.value)}>
+                                <option value="">Selecciona subcategoría</option>
+                                {subcategories.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                            </select>
+                            <button onClick={handleCreateProduct} style={{width: "100%", padding: "12px", backgroundColor: "#1a1a1a", color: "white", border: "none", fontFamily: "sans-serif", fontSize: "0.75rem", letterSpacing: "2px", cursor: "pointer"}}>
+                                CREAR PRODUCTO
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Lista productos */}
+                {products.length > 0 && (
+                    <div style={{marginTop: "40px", backgroundColor: "white", padding: "32px", boxShadow: "0 2px 15px rgba(0,0,0,0.06)"}}>
+                        <h4 style={{fontFamily: "Georgia, serif", fontWeight: "400", marginBottom: "24px"}}>Productos en catálogo ({products.length})</h4>
+                        <div className="row g-3">
+                            {products.map(p => (
+                                <div key={p.id} className="col-md-3">
+                                    <div style={{border: "1px solid #f0f0f0", padding: "16px"}}>
+                                        <img src={p.image_url || "https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=200"} style={{width: "100%", height: "100px", objectFit: "cover", marginBottom: "12px"}} />
+                                        <p style={{fontFamily: "Georgia, serif", fontSize: "0.9rem", marginBottom: "4px"}}>{p.name}</p>
+                                        <p style={{color: "#C9A84C", fontFamily: "sans-serif", fontSize: "0.85rem", margin: 0}}>€{p.price}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     )

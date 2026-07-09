@@ -25,7 +25,7 @@ export const Navbar = () => {
                 fontSize: "1rem",
                 fontWeight: "400"
             }}>
-                🍹 IN VINO VERITAS
+                Spirits Shop
             </Link>
 
             <div style={{display: "flex", alignItems: "center", gap: "32px"}}>
