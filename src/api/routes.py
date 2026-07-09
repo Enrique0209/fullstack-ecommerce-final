@@ -101,6 +101,24 @@ def update_product(product_id):
     db.session.commit()
     return jsonify({"message": "Producto actualizado exitosamente :)"}), 200
 
+@api.route('/product/<int:product_id>', methods=['DELETE'])
+@jwt_required()
+def delete_product(product_id):
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    if not user.is_admin:
+        return jsonify({"message": "Acceso denegado"}), 403
+
+    product = Product.query.get(product_id)
+    if product is None:
+        return jsonify({"message": "Producto no encontrado"}), 404
+
+    CarItem.query.filter_by(product_id=product_id).delete()
+
+    db.session.delete(product)
+    db.session.commit()
+    return jsonify({"message": "Producto eliminado exitosamente :)"}), 200
+
 
 # ─── CATEGORÍAS ───────────────────────────────────────────────────────────────
 
