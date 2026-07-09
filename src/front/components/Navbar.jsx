@@ -86,7 +86,8 @@ export const Navbar = () => {
                         padding: "7px 20px",
                         fontSize: "0.7rem",
                         letterSpacing: "2px",
-                        fontFamily: "sans-serif"
+                        fontFamily: "sans-serif",
+                        borderRadius: "20px"
                     }}>ADMIN</Link>
                 )}
 
@@ -103,7 +104,8 @@ export const Navbar = () => {
                             fontSize: "0.7rem",
                             letterSpacing: "2px",
                             fontFamily: "sans-serif",
-                            cursor: "pointer"
+                            cursor: "pointer",
+                            borderRadius: "20px"
                         }}>CERRAR SESIÓN</button>
                     </>
                 ) : (
@@ -115,7 +117,8 @@ export const Navbar = () => {
                             padding: "7px 20px",
                             fontSize: "0.7rem",
                             letterSpacing: "2px",
-                            fontFamily: "sans-serif"
+                            fontFamily: "sans-serif",
+                            borderRadius: "20px"
                         }}>LOGIN</Link>
                         <Link to="/register" style={{
                             backgroundColor: "#C9A84C",
@@ -124,7 +127,8 @@ export const Navbar = () => {
                             padding: "7px 20px",
                             fontSize: "0.7rem",
                             letterSpacing: "2px",
-                            fontFamily: "sans-serif"
+                            fontFamily: "sans-serif",
+                            borderRadius: "20px"
                         }}>REGISTRO</Link>
                     </>
                 )}
