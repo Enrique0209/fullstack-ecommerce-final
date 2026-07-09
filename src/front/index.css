@@ -54,3 +54,36 @@ button {
     transform: translateY(-2px);
     box-shadow: 0 6px 18px rgba(0,0,0,0.08);
 }
+
+/* Formato para pantalla chica */
+.navbar-toggle {
+    display: none;
+}
+
+@media (max-width: 860px) {
+    .navbar-toggle {
+        display: block !important;
+    }
+
+    .navbar-links {
+        display: none !important;
+        position: absolute !important;
+        top: 65px !important;
+        left: 0 !important;
+        right: 0 !important;
+        background-color: #1a1a1a !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        padding: 20px 24px !important;
+        gap: 18px !important;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3) !important;
+    }
+
+    .navbar-links.open {
+        display: flex !important;
+    }
+
+    .navbar-brand-text {
+        font-size: 0.85rem !important;
+    }
+}

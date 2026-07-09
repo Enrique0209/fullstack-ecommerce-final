@@ -1,10 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useGlobalReducer from "../hooks/useGlobalReducer";
 
 export const Navbar = () => {
     const { store, dispatch } = useGlobalReducer()
     const navigate = useNavigate()
+    const [menuOpen, setMenuOpen] = useState(false)
 
     const loadCart = async () => {
         const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/cart", {
@@ -23,14 +24,17 @@ export const Navbar = () => {
     const cartCount = store.cart.reduce((sum, item) => sum + item.quantity, 0)
 
     const handleLogout = () => {
+        setMenuOpen(false)
         dispatch({ type: "logout" })
         navigate("/login")
     }
 
+    const closeMenu = () => setMenuOpen(false)
+
     return (
         <nav style={{
             backgroundColor: "#1a1a1a",
-            padding: "0 40px",
+            padding: "0 24px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -40,21 +44,37 @@ export const Navbar = () => {
             zIndex: 1000,
             boxShadow: "0 2px 10px rgba(0,0,0,0.3)"
         }}>
-            <Link to="/" style={{
+            <Link to="/" onClick={closeMenu} className="navbar-brand-text" style={{
                 color: "white",
                 textDecoration: "none",
                 fontFamily: "Georgia, serif",
                 letterSpacing: "3px",
                 fontSize: "1rem",
-                fontWeight: "400"
+                fontWeight: "400",
+                whiteSpace: "nowrap"
             }}>
                 Spirits Shop
             </Link>
 
-            <div style={{display: "flex", alignItems: "center", gap: "32px"}}>
-                <Link to="/catalog" style={{color: "white", textDecoration: "none", fontSize: "0.75rem", letterSpacing: "2px", fontFamily: "sans-serif"}}>CATÁLOGO</Link>
+            <button
+                className="navbar-toggle"
+                onClick={() => setMenuOpen(!menuOpen)}
+                style={{
+                    background: "none",
+                    border: "none",
+                    color: "white",
+                    fontSize: "1.5rem",
+                    cursor: "pointer",
+                    padding: "4px 8px"
+                }}
+            >
+                {menuOpen ? "✕" : "☰"}
+            </button>
 
-                <Link to="/cart" style={{color: "white", textDecoration: "none", fontSize: "0.75rem", letterSpacing: "2px", fontFamily: "sans-serif", position: "relative"}}>
+            <div className={`navbar-links ${menuOpen ? "open" : ""}`} style={{display: "flex", alignItems: "center", gap: "32px"}}>
+                <Link to="/catalog" onClick={closeMenu} style={{color: "white", textDecoration: "none", fontSize: "0.75rem", letterSpacing: "2px", fontFamily: "sans-serif"}}>CATÁLOGO</Link>
+
+                <Link to="/cart" onClick={closeMenu} style={{color: "white", textDecoration: "none", fontSize: "0.75rem", letterSpacing: "2px", fontFamily: "sans-serif", position: "relative"}}>
                     🛒 CARRITO
                     {cartCount > 0 && (
                         <span style={{
@@ -75,11 +95,11 @@ export const Navbar = () => {
                 </Link>
 
                 {store.token && (
-                    <Link to="/profile" style={{color: "white", textDecoration: "none", fontSize: "0.75rem", letterSpacing: "2px", fontFamily: "sans-serif"}}>PERFIL</Link>
+                    <Link to="/profile" onClick={closeMenu} style={{color: "white", textDecoration: "none", fontSize: "0.75rem", letterSpacing: "2px", fontFamily: "sans-serif"}}>PERFIL</Link>
                 )}
 
                 {store.token && store.user?.is_admin && (
-                    <Link to="/admin" style={{
+                    <Link to="/admin" onClick={closeMenu} style={{
                         backgroundColor: "#8B0000",
                         color: "white",
                         textDecoration: "none",
@@ -110,7 +130,7 @@ export const Navbar = () => {
                     </>
                 ) : (
                     <>
-                        <Link to="/login" style={{
+                        <Link to="/login" onClick={closeMenu} style={{
                             color: "#C9A84C",
                             textDecoration: "none",
                             border: "1px solid #C9A84C",
@@ -120,7 +140,7 @@ export const Navbar = () => {
                             fontFamily: "sans-serif",
                             borderRadius: "20px"
                         }}>LOGIN</Link>
-                        <Link to="/register" style={{
+                        <Link to="/register" onClick={closeMenu} style={{
                             backgroundColor: "#C9A84C",
                             color: "white",
                             textDecoration: "none",
