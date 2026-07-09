@@ -104,9 +104,9 @@ export const Home = () => {
             {/* Footer */}
             <div style={{backgroundColor: "#1a1a1a", color: "white", padding: "48px 0"}}>
                 <div className="container text-center">
-                    <h5 style={{color: "#C9A84C", letterSpacing: "4px", fontWeight: "300", marginBottom: "16px"}}>IN VINO VERITAS</h5>
+                    <h5 style={{color: "#C9A84C", letterSpacing: "4px", fontWeight: "300", marginBottom: "16px"}}>Spirits Shop</h5>
                     <p style={{opacity: "0.5", fontSize: "0.8rem", fontFamily: "sans-serif", marginBottom: "16px"}}>Distribuidores de destilados mexicanos · Madrid</p>
-                    <p style={{opacity: "0.3", fontSize: "0.75rem", fontFamily: "sans-serif"}}>© 2026 In Vino Veritas · Todos los derechos reservados</p>
+                    <p style={{opacity: "0.3", fontSize: "0.75rem", fontFamily: "sans-serif"}}>© 2026 Spirits Shop · Todos los derechos reservados</p>
                 </div>
             </div>
 
