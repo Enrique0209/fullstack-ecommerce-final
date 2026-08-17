@@ -96,6 +96,24 @@ class Order(db.Model):
     created_at: Mapped[datetime] = mapped_column(DateTime(), nullable=False)
     total: Mapped[float] = mapped_column(Float(), nullable=False)
     status: Mapped[str] = mapped_column(String(50), nullable=False)
+    paypal_order_id: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+
+    # Dirección de entrega (obligatoria)
+    shipping_address: Mapped[str] = mapped_column(String(200), nullable=False)
+    shipping_address2: Mapped[str] = mapped_column(String(100), nullable=True)
+    shipping_postal_code: Mapped[str] = mapped_column(String(10), nullable=False)
+    shipping_city: Mapped[str] = mapped_column(String(80), nullable=False)
+    shipping_province: Mapped[str] = mapped_column(String(80), nullable=False)
+    shipping_phone: Mapped[str] = mapped_column(String(20), nullable=False)
+
+    # Facturación
+    billing_same_as_shipping: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=True)
+    billing_address: Mapped[str] = mapped_column(String(200), nullable=True)
+    billing_postal_code: Mapped[str] = mapped_column(String(10), nullable=True)
+    billing_city: Mapped[str] = mapped_column(String(80), nullable=True)
+    billing_province: Mapped[str] = mapped_column(String(80), nullable=True)
+    billing_cif: Mapped[str] = mapped_column(String(20), nullable=True)
+    billing_name: Mapped[str] = mapped_column(String(150), nullable=True)
 
     def serialize(self):
         return {
@@ -104,7 +122,20 @@ class Order(db.Model):
             "created_at": self.created_at,
             "total": self.total,
             "status": self.status,
-            
+            "paypal_order_id": self.paypal_order_id,
+            "shipping_address": self.shipping_address,
+            "shipping_address2": self.shipping_address2,
+            "shipping_postal_code": self.shipping_postal_code,
+            "shipping_city": self.shipping_city,
+            "shipping_province": self.shipping_province,
+            "shipping_phone": self.shipping_phone,
+            "billing_same_as_shipping": self.billing_same_as_shipping,
+            "billing_address": self.billing_address,
+            "billing_postal_code": self.billing_postal_code,
+            "billing_city": self.billing_city,
+            "billing_province": self.billing_province,
+            "billing_cif": self.billing_cif,
+            "billing_name": self.billing_name,
         }
     
 class OrderItem(db.Model):
