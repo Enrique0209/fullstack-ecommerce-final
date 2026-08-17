@@ -8,6 +8,7 @@ export const Admin = () => {
     const [categoryName, setCategoryName] = useState("")
     const [subcategoryName, setSubcategoryName] = useState("")
     const [categoryId, setCategoryId] = useState("")
+    const [sku, setSku] = useState("")
     const [productName, setProductName] = useState("")
     const [price, setPrice] = useState("")
     const [priceHoreca, setPriceHoreca] = useState("")
@@ -68,6 +69,7 @@ export const Admin = () => {
 
     const resetProductForm = () => {
         setEditingProductId(null)
+        setSku("")
         setProductName("")
         setPrice("")
         setPriceHoreca("")
@@ -79,6 +81,7 @@ export const Admin = () => {
 
     const handleEditClick = (product) => {
         setEditingProductId(product.id)
+        setSku(product.sku || "")
         setProductName(product.name || "")
         setPrice(product.price ?? "")
         setPriceHoreca(product.price_horeca ?? "")
@@ -94,6 +97,7 @@ export const Admin = () => {
             method: "POST",
             headers: { "Content-Type": "application/json", "Authorization": "Bearer " + store.token },
             body: JSON.stringify({
+                sku: sku,
                 name: productName,
                 price: parseFloat(price),
                 price_horeca: parseFloat(priceHoreca),
@@ -103,7 +107,9 @@ export const Admin = () => {
                 image_url: imageUrl
             })
         })
+        const data = await response.json()
         if (response.ok) { setMessage("Producto creado ✓"); resetProductForm(); loadProducts() }
+        else { setMessage(data.message || "Error al crear el producto") }
     }
 
     const handleUpdateProduct = async () => {
@@ -111,6 +117,7 @@ export const Admin = () => {
             method: "PUT",
             headers: { "Content-Type": "application/json", "Authorization": "Bearer " + store.token },
             body: JSON.stringify({
+                sku: sku,
                 name: productName,
                 price: parseFloat(price),
                 price_horeca: parseFloat(priceHoreca),
@@ -120,8 +127,9 @@ export const Admin = () => {
                 image_url: imageUrl
             })
         })
+        const data = await response.json()
         if (response.ok) { setMessage("Producto actualizado ✓"); resetProductForm(); loadProducts() }
-        else { setMessage("Error al actualizar el producto") }
+        else { setMessage(data.message || "Error al actualizar el producto") }
     }
 
     const handleDeleteProduct = async (product_id) => {
@@ -258,6 +266,8 @@ export const Admin = () => {
                                     </span>
                                 )}
                             </div>
+                            <input className="app-input" style={boxedInputStyle}
+                                placeholder="SKU" value={sku} onChange={(e) => setSku(e.target.value)} />
                             {[
                                 { placeholder: "Nombre", value: productName, setter: setProductName },
                                 { placeholder: "Descripción", value: description, setter: setDescription },
@@ -328,6 +338,7 @@ export const Admin = () => {
                                                 <img src={p.image_url || "https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=200"} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
                                             </div>
                                             <div style={{padding: "14px"}}>
+                                                <p style={{ color: "#999", fontFamily: "sans-serif", fontSize: "0.62rem", letterSpacing: "0.5px", marginBottom: "2px" }}>SKU: {p.sku}</p>
                                                 <p style={{ fontFamily: "Georgia, serif", fontSize: "0.85rem", marginBottom: "2px" }}>{p.name}</p>
                                                 <div style={{display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px"}}>
                                                     <span style={{ color: "#C9A84C", fontFamily: "sans-serif", fontSize: "0.8rem", fontWeight: "700" }}>€{p.price}</span>

@@ -50,6 +50,7 @@ class SubCategory(db.Model):
     
 class Product(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
+    sku: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     name: Mapped[str]= mapped_column(String(80), nullable=False)
     description: Mapped[str]= mapped_column(String(), nullable=True)
     price: Mapped[float]=mapped_column(Float(), nullable=False)
@@ -62,6 +63,7 @@ class Product(db.Model):
     def serialize(self):
         return {
             "id": self.id,
+            "sku": self.sku,
             "name": self.name,
             "description": self.description,
             "price": self.price,

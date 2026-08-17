@@ -30,6 +30,17 @@ def update_product(product_id):
         return jsonify({"message": "Producto no encontrado"}), 404
 
     body = request.get_json()
+    new_sku = body.get("sku", product.sku)
+
+    if not new_sku or not new_sku.strip():
+        return jsonify({"message": "El SKU es obligatorio"}), 400
+
+    if new_sku != product.sku:
+        existing = Product.query.filter_by(sku=new_sku).first()
+        if existing is not None:
+            return jsonify({"message": "Ya existe un producto con ese SKU"}), 409
+
+    product.sku = new_sku
     product.name = body.get("name", product.name)
     product.price = body.get("price", product.price)
     product.price_horeca = body.get("price_horeca", product.price_horeca)

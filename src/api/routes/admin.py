@@ -35,6 +35,7 @@ def admin_create_subcategory():
 @admin_required
 def admin_create_product():
     body = request.get_json()
+    sku = body.get("sku")
     name = body.get("name")
     price = body.get("price")
     price_horeca = body.get("price_horeca")
@@ -42,7 +43,15 @@ def admin_create_product():
     stock = body.get("stock")
     subcategory_id = body.get("subcategory_id")
     image_url = body.get("image_url")
-    new_product = Product(name=name, price=price, price_horeca=price_horeca,
+
+    if not sku or not sku.strip():
+        return jsonify({"message": "El SKU es obligatorio"}), 400
+
+    existing = Product.query.filter_by(sku=sku).first()
+    if existing is not None:
+        return jsonify({"message": "Ya existe un producto con ese SKU"}), 409
+
+    new_product = Product(sku=sku, name=name, price=price, price_horeca=price_horeca,
                           description=description, stock=stock,
                           subcategory_id=subcategory_id, image_url=image_url)
     db.session.add(new_product)
