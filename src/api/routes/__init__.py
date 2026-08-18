@@ -22,3 +22,4 @@ from api.routes import categories
 from api.routes import cart
 from api.routes import profile
 from api.routes import admin
+from api.routes import order
