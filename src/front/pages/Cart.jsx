@@ -198,12 +198,12 @@ export const Cart = () => {
                                         }]
                                     })
                                 }}
-                                onApprove={(data, actions) => {
-                                    return actions.order.capture().then(() => {
-                                        alert("¡Pago completado con éxito!")
-                                        clearCartAfterPayment()
-                                    })
-                                }}
+                                        onApprove={(data, actions) => {
+                                            return actions.order.capture().then(() => {
+                                                alert("¡Pago completado con éxito! Revisa la consola (F12) para ver el order_id.")
+                                                clearCartAfterPayment()
+                                            })
+                                        }}
                             />
                         </div>
                     </div>
