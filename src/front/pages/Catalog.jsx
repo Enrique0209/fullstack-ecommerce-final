@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
 import useGlobalReducer from "../hooks/useGlobalReducer"
 import { Link } from "react-router-dom"
+import { getCartHeaders } from "../cartAuth"
 
 export const Catalog = () => {
     const { store, dispatch } = useGlobalReducer()
@@ -44,16 +45,13 @@ export const Catalog = () => {
     const addToCart = async (product_id) => {
         const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/cart", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + store.token
-            },
+            headers: getCartHeaders(store, { "Content-Type": "application/json" }),
             body: JSON.stringify({ product_id: product_id, quantity: 1 })
         })
 
         if (response.ok) {
             const cartResponse = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/cart", {
-                headers: { "Authorization": "Bearer " + store.token }
+                headers: getCartHeaders(store)
             })
             if (cartResponse.ok) {
                 const cartData = await cartResponse.json()
@@ -61,7 +59,7 @@ export const Catalog = () => {
             }
             setToastMessage("✓ Producto agregado al carrito")
         } else {
-            setToastMessage("Debes iniciar sesión para agregar productos")
+            setToastMessage("No se pudo agregar el producto")
         }
         return response.ok
     }

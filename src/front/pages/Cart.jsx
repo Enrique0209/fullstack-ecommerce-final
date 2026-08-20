@@ -1,19 +1,12 @@
 import React, { useEffect } from "react"
 import useGlobalReducer from "../hooks/useGlobalReducer"
 import { PayPalButtons } from "@paypal/react-paypal-js"
+import { getCartHeaders, fetchCart } from "../cartAuth"
 
 export const Cart = () => {
     const { store, dispatch } = useGlobalReducer()
 
-    const loadCart = async () => {
-        const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/cart", {
-            headers: { "Authorization": "Bearer " + store.token }
-        })
-        if (response.ok) {
-            const data = await response.json()
-            dispatch({ type: "set_cart", payload: data })
-        }
-    }
+    const loadCart = () => fetchCart(store, dispatch)
 
     const loadProducts = async () => {
         const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/product")
@@ -26,7 +19,7 @@ export const Cart = () => {
     const removeFromCart = async (item_id) => {
         const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/cart/" + item_id, {
             method: "DELETE",
-            headers: { "Authorization": "Bearer " + store.token }
+            headers: getCartHeaders(store)
         })
         if (response.ok) loadCart()
     }
@@ -38,10 +31,7 @@ export const Cart = () => {
         }
         const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/cart/" + item.id, {
             method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + store.token
-            },
+            headers: getCartHeaders(store, { "Content-Type": "application/json" }),
             body: JSON.stringify({ quantity: newQuantity })
         })
         if (response.ok) loadCart()
@@ -51,7 +41,7 @@ export const Cart = () => {
         for (const item of store.cart) {
             await fetch(import.meta.env.VITE_BACKEND_URL + "/api/cart/" + item.id, {
                 method: "DELETE",
-                headers: { "Authorization": "Bearer " + store.token }
+                headers: getCartHeaders(store)
             })
         }
         dispatch({ type: "set_cart", payload: [] })

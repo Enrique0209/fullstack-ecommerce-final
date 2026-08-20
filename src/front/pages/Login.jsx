@@ -1,11 +1,12 @@
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import useGlobalReducer from "../hooks/useGlobalReducer"
+import { getCartHeaders, clearGuestToken, fetchCart } from "../cartAuth"
 
 export const Login = () => {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
-    const { dispatch } = useGlobalReducer()
+    const { store, dispatch } = useGlobalReducer()
     const navigate = useNavigate()
     const [error, setError] = useState("")
 
@@ -20,13 +21,22 @@ export const Login = () => {
         try {
             const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/login", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                // getCartHeaders manda el X-Guest-Token actual (si existe) para
+                // que el backend fusione el carrito de invitado al usuario.
+                headers: getCartHeaders(store, { "Content-Type": "application/json" }),
                 body: JSON.stringify({ email, password }),
             })
 
             if (response.ok) {
                 const data = await response.json()
                 dispatch({ type: "set_user", payload: { user: data.user, token: data.token } })
+                // El merge ya pasó en el backend: el guest_token local ya no
+                // representa ningún carrito propio, lo limpiamos.
+                clearGuestToken()
+                // Usamos data.token directo (no store.token) porque el store
+                // del closure todavía no refleja el dispatch de arriba —
+                // React no actualiza el store sincrónicamente.
+                await fetchCart({ token: data.token }, dispatch)
                 navigate("/catalog")
             } else {
                 setError("Email o contraseña incorrectos")

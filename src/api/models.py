@@ -77,7 +77,12 @@ class Product(db.Model):
 class CarItem(db.Model):
     __tablename__ = "cart_item"
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
+    # Nullable ahora: un item de carrito pertenece a un user_id (logueado)
+    # O a un guest_token (invitado), nunca ambos, nunca ninguno.
+    # Esa regla se valida en cart.py, no aquí a nivel DB, para no complicar
+    # la migración con un CheckConstraint.
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=True)
+    guest_token: Mapped[str] = mapped_column(String(36), nullable=True, index=True)
     product_id: Mapped[int] = mapped_column(ForeignKey("product.id"), nullable=False)
     quantity: Mapped[int] = mapped_column(Integer(), nullable=False)
 
@@ -85,6 +90,7 @@ class CarItem(db.Model):
         return {
             "id": self.id,
             "user_id": self.user_id,
+            "guest_token": self.guest_token,
             "product_id": self.product_id,
             "quantity": self.quantity,
             
