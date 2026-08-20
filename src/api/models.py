@@ -98,7 +98,12 @@ class CarItem(db.Model):
     
 class Order(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
+    # Nullable ahora: un pedido pertenece a un user_id (logueado) O a un
+    # guest_name/guest_email (invitado), nunca ambos, nunca ninguno.
+    # Misma regla que en CarItem, validada en order.py.
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=True)
+    guest_name: Mapped[str] = mapped_column(String(150), nullable=True)
+    guest_email: Mapped[str] = mapped_column(String(120), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(), nullable=False)
     total: Mapped[float] = mapped_column(Float(), nullable=False)
     status: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -125,6 +130,8 @@ class Order(db.Model):
         return {
             "id": self.id,
             "user_id": self.user_id,
+            "guest_name": self.guest_name,
+            "guest_email": self.guest_email,
             "created_at": self.created_at,
             "total": self.total,
             "status": self.status,

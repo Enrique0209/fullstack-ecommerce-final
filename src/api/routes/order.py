@@ -1,15 +1,19 @@
 """
 Pedidos: creación con verificación de pago contra la API de PayPal.
+Soporta usuarios logueados (JWT) e invitados (X-Guest-Token), igual que
+cart.py — reusamos get_cart_owner() para no duplicar esa lógica.
 El backend nunca confía en el total que envía el frontend — siempre
 recalcula desde los precios reales en la base de datos.
 """
 import os
+import re
 import requests
 from datetime import datetime
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from api.models import db, CarItem, Product, Order, OrderItem, User
 from api.routes import api
+from api.routes.cart import get_cart_owner
 
 
 PAYPAL_MODE = os.getenv("PAYPAL_MODE", "sandbox")
@@ -17,6 +21,8 @@ PAYPAL_BASE_URL = (
     "https://api-m.sandbox.paypal.com" if PAYPAL_MODE == "sandbox"
     else "https://api-m.paypal.com"
 )
+
+EMAIL_REGEX = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 
 
 def get_paypal_access_token():
@@ -60,12 +66,17 @@ def verify_paypal_order(paypal_order_id, access_token):
 
 
 @api.route('/order', methods=['POST'])
-@jwt_required()
+@jwt_required(optional=True)
 def create_order():
-    user_id = get_jwt_identity()
-    user = User.query.get(user_id)
-    if user is None:
-        return jsonify({"message": "Usuario no encontrado"}), 404
+    user_id, guest_token = get_cart_owner()
+    if user_id is None and guest_token is None:
+        return jsonify({"message": "Se requiere sesión o X-Guest-Token"}), 400
+
+    user = None
+    if user_id is not None:
+        user = User.query.get(user_id)
+        if user is None:
+            return jsonify({"message": "Usuario no encontrado"}), 404
 
     body = request.get_json()
     paypal_order_id = body.get("paypal_order_id")
@@ -77,6 +88,18 @@ def create_order():
     existing_order = Order.query.filter_by(paypal_order_id=paypal_order_id).first()
     if existing_order is not None:
         return jsonify({"message": "Este pago ya fue procesado"}), 409
+
+    # ── Datos de contacto del invitado (solo si no hay sesión) ──────────
+    guest_name = None
+    guest_email = None
+    if user is None:
+        guest_name = (body.get("guest_name") or "").strip()
+        guest_email = (body.get("guest_email") or "").strip()
+
+        if not guest_name:
+            return jsonify({"message": "El nombre es obligatorio"}), 400
+        if not EMAIL_REGEX.match(guest_email):
+            return jsonify({"message": "Ingresa un email válido"}), 400
 
     # ── Datos de dirección ──────────────────────────────────────────────
     shipping_address = body.get("shipping_address")
@@ -122,8 +145,12 @@ def create_order():
     if paypal_data["status"] != "COMPLETED":
         return jsonify({"message": "El pago no está completado"}), 400
 
-    # ── Leer carrito y calcular total real desde la DB ──────────────────
-    cart_items = CarItem.query.filter_by(user_id=user_id).all()
+    # ── Leer carrito (user o invitado) y calcular total real desde la DB ─
+    if user_id is not None:
+        cart_items = CarItem.query.filter_by(user_id=user_id).all()
+    else:
+        cart_items = CarItem.query.filter_by(guest_token=guest_token).all()
+
     if not cart_items:
         return jsonify({"message": "El carrito está vacío"}), 400
 
@@ -140,7 +167,8 @@ def create_order():
                 "message": f"Lo sentimos, en estos momentos no hay stock suficiente de '{product.name}'"
             }), 409
 
-        unit_price = product.price_horeca if user.is_horeca else product.price
+        # Invitados nunca ven precio HORECA — is_horeca solo existe en User.
+        unit_price = product.price_horeca if (user is not None and user.is_horeca) else product.price
         calculated_total += unit_price * item.quantity
 
         order_items_data.append({
@@ -160,6 +188,8 @@ def create_order():
     # ── Todo válido: crear el pedido ────────────────────────────────────
     new_order = Order(
         user_id=user_id,
+        guest_name=guest_name,
+        guest_email=guest_email,
         created_at=datetime.utcnow(),
         total=calculated_total,
         status="paid",
@@ -192,7 +222,10 @@ def create_order():
         db.session.add(order_item)
         product.stock -= item_data["quantity"]
 
-    CarItem.query.filter_by(user_id=user_id).delete()
+    if user_id is not None:
+        CarItem.query.filter_by(user_id=user_id).delete()
+    else:
+        CarItem.query.filter_by(guest_token=guest_token).delete()
 
     db.session.commit()
 
@@ -205,6 +238,8 @@ def create_order():
 @api.route('/order', methods=['GET'])
 @jwt_required()
 def get_my_orders():
+    # Sin optional=True a propósito: el historial de pedidos es una
+    # feature exclusiva de cuenta, un invitado no tiene "mis pedidos".
     user_id = get_jwt_identity()
     orders = Order.query.filter_by(user_id=user_id).order_by(Order.created_at.desc()).all()
     return jsonify([order.serialize() for order in orders]), 200

@@ -1,10 +1,11 @@
 import React, { useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import useGlobalReducer from "../hooks/useGlobalReducer"
-import { PayPalButtons } from "@paypal/react-paypal-js"
 import { getCartHeaders, fetchCart } from "../cartAuth"
 
 export const Cart = () => {
     const { store, dispatch } = useGlobalReducer()
+    const navigate = useNavigate()
 
     const loadCart = () => fetchCart(store, dispatch)
 
@@ -37,20 +38,15 @@ export const Cart = () => {
         if (response.ok) loadCart()
     }
 
-    const clearCartAfterPayment = async () => {
-        for (const item of store.cart) {
-            await fetch(import.meta.env.VITE_BACKEND_URL + "/api/cart/" + item.id, {
-                method: "DELETE",
-                headers: getCartHeaders(store)
-            })
-        }
-        dispatch({ type: "set_cart", payload: [] })
-    }
-
     useEffect(() => {
         loadCart()
         if (store.products.length === 0) loadProducts()
     }, [])
+
+    const cartTotal = store.cart.reduce((sum, item) => {
+        const product = store.products.find(p => p.id === item.product_id)
+        return sum + (product ? product.price * item.quantity : 0)
+    }, 0)
 
     return (
     <div style={{backgroundColor: "#F7F5F0", minHeight: "100vh"}}>
@@ -169,32 +165,20 @@ export const Cart = () => {
                             <div style={{display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px"}}>
                                 <span style={{fontFamily: "Georgia, serif", fontSize: "1.1rem"}}>TOTAL</span>
                                 <span style={{color: "#C9A84C", fontWeight: "700", fontSize: "1.4rem", fontFamily: "sans-serif"}}>
-                                    €{store.cart.reduce((sum, item) => {
-                                        const product = store.products.find(p => p.id === item.product_id)
-                                        return sum + (product ? product.price * item.quantity : 0)
-                                    }, 0).toFixed(2)}
+                                    €{cartTotal.toFixed(2)}
                                 </span>
                             </div>
-                            <PayPalButtons
-                                createOrder={(data, actions) => {
-                                    return actions.order.create({
-                                        purchase_units: [{
-                                            amount: {
-                                                value: store.cart.reduce((sum, item) => {
-                                                    const product = store.products.find(p => p.id === item.product_id)
-                                                    return sum + (product ? product.price * item.quantity : 0)
-                                                }, 0).toFixed(2)
-                                            }
-                                        }]
-                                    })
-                                }}
-                                        onApprove={(data, actions) => {
-                                            return actions.order.capture().then(() => {
-                                                alert("¡Pago completado con éxito! Revisa la consola (F12) para ver el order_id.")
-                                                clearCartAfterPayment()
-                                            })
-                                        }}
-                            />
+                            <button
+                                onClick={() => navigate("/checkout")}
+                                className="btn w-100 btn-lg"
+                                style={{
+                                    backgroundColor: "#C9A84C",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: "6px"
+                                }}>
+                                Ir a pagar
+                            </button>
                         </div>
                     </div>
                 </div>

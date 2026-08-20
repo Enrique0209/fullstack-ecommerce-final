@@ -11,6 +11,7 @@ import { Login } from "./pages/Login";
 import { Catalog } from "./pages/Catalog";
 import { Register } from "./pages/Register";
 import { Cart } from "./pages/Cart";
+import { Checkout } from "./pages/Checkout";
 import { ProductDetail } from "./pages/ProductDetail";
 import { Profile } from "./pages/Profile";
 import { Admin } from "./pages/Admin";
@@ -31,6 +32,9 @@ export const router = createBrowserRouter(
 
         {/* Carrito de compras */}
         <Route path="/cart" element={<Cart />} />
+
+        {/* Checkout: formulario de envío/facturación + pago PayPal */}
+        <Route path="/checkout" element={<Checkout />} />
 
         {/* Perfil del usuario */}
         <Route path="/profile" element={<Profile />} />
