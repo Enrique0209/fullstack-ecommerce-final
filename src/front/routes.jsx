@@ -15,6 +15,7 @@ import { Checkout } from "./pages/Checkout";
 import { ProductDetail } from "./pages/ProductDetail";
 import { Profile } from "./pages/Profile";
 import { Admin } from "./pages/Admin";
+import { VerifyEmail } from "./pages/VerifyEmail";
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
@@ -50,6 +51,8 @@ export const router = createBrowserRouter(
         <Route path="/demo" element={<Demo />} />
         {/* Rutas de administración */}
         <Route path="/admin" element={<Admin />} />
+        {/* Verificación de email: el usuario llega aquí desde el link del correo */}
+<Route path="/verificar-email/:token" element={<VerifyEmail />} />
       </Route>
     )
 );

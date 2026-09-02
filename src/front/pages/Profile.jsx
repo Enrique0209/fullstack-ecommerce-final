@@ -7,6 +7,9 @@ export const Profile = () => {
     const navigate = useNavigate()
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
+    const [emailVerified, setEmailVerified] = useState(true) // true por default para no parpadear el banner mientras carga
+    const [resendStatus, setResendStatus] = useState("idle") // "idle" | "sending" | "sent" | "error"
+    const [resendMessage, setResendMessage] = useState("")
 
     useEffect(() => {
         if (!store.token) {
@@ -24,6 +27,7 @@ export const Profile = () => {
             const data = await response.json()
             setName(data.name)
             setEmail(data.email)
+            setEmailVerified(data.email_verified)
         }
     }
 
@@ -36,7 +40,12 @@ export const Profile = () => {
             },
             body: JSON.stringify({ name, email })
         })
-        if (response.ok) alert("Perfil actualizado")
+        if (response.ok) {
+            alert("Perfil actualizado")
+            // Si cambiaste el email, el backend lo marcó como no verificado
+            // de nuevo — recargamos el perfil para que el banner reaparezca.
+            loadProfile()
+        }
     }
 
     const handleDeleteProfile = async () => {
@@ -50,6 +59,28 @@ export const Profile = () => {
         if (response.ok) {
             dispatch({ type: "logout" })
             navigate("/login")
+        }
+    }
+
+    const handleResendVerification = async () => {
+        setResendStatus("sending")
+        setResendMessage("")
+        try {
+            const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/resend-verification", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email })
+            })
+            const data = await response.json()
+            if (response.ok) {
+                setResendStatus("sent")
+            } else {
+                setResendStatus("error")
+            }
+            setResendMessage(data.message)
+        } catch (err) {
+            setResendStatus("error")
+            setResendMessage("No se pudo conectar con el servidor")
         }
     }
 
@@ -74,6 +105,57 @@ export const Profile = () => {
                 maxWidth: "480px",
                 borderRadius: "12px"
             }}>
+                {!emailVerified && (
+                    <div style={{
+                        backgroundColor: "#FFF8E5",
+                        border: "1px solid #C9A84C",
+                        borderRadius: "8px",
+                        padding: "16px 20px",
+                        marginBottom: "32px"
+                    }}>
+                        <p style={{
+                            margin: 0,
+                            fontFamily: "sans-serif",
+                            fontSize: "0.85rem",
+                            color: "#1a1a1a",
+                            marginBottom: "10px"
+                        }}>
+                            Tu correo aún no está verificado. Necesitas verificarlo para poder comprar con tu cuenta.
+                        </p>
+
+                        {resendStatus !== "sent" && (
+                            <button
+                                onClick={handleResendVerification}
+                                disabled={resendStatus === "sending"}
+                                style={{
+                                    backgroundColor: "transparent",
+                                    color: "#C9A84C",
+                                    border: "1px solid #C9A84C",
+                                    borderRadius: "6px",
+                                    padding: "8px 16px",
+                                    fontSize: "0.7rem",
+                                    letterSpacing: "1px",
+                                    fontFamily: "sans-serif",
+                                    cursor: resendStatus === "sending" ? "default" : "pointer",
+                                    opacity: resendStatus === "sending" ? 0.6 : 1
+                                }}>
+                                {resendStatus === "sending" ? "ENVIANDO..." : "REENVIAR CORREO DE VERIFICACIÓN"}
+                            </button>
+                        )}
+
+                        {resendMessage && (
+                            <p style={{
+                                margin: "10px 0 0",
+                                fontSize: "0.8rem",
+                                fontFamily: "sans-serif",
+                                color: resendStatus === "error" ? "#cc0000" : "#3a7d3a"
+                            }}>
+                                {resendMessage}
+                            </p>
+                        )}
+                    </div>
+                )}
+
                 <div style={{marginBottom: "24px"}}>
                     <label style={{display: "block", fontSize: "0.7rem", letterSpacing: "2px", fontFamily: "sans-serif", color: "#888", marginBottom: "8px"}}>NOMBRE</label>
                     <input

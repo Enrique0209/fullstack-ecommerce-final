@@ -1,13 +1,19 @@
 """
-Autenticación: registro, login, y ruta de prueba.
+Autenticación: registro, login, verificación de email, y ruta de prueba.
 """
+from datetime import datetime, timedelta
 from flask import request, jsonify
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import create_access_token
-from api.models import db, User, CarItem
+from api.models import db, User, CarItem, EmailVerification
 from api.routes import api
+from api.email_service import send_verification_email
 
 bcrypt = Bcrypt()
+
+# Tiempo mínimo entre reenvíos de verificación, para evitar que alguien
+# spamee el endpoint y agote la cuota de Resend.
+RESEND_COOLDOWN_MINUTES = 2
 
 
 # ─── RUTA DE PRUEBA ───────────────────────────────────────────────────────────
@@ -21,6 +27,19 @@ def handle_hello():
 
 
 # ─── AUTENTICACIÓN ────────────────────────────────────────────────────────────
+
+def _create_and_send_verification(user):
+    """
+    Crea una fila EmailVerification para el usuario y dispara el correo.
+    Reutilizada por register() y por resend-verification.
+    Devuelve True si Resend aceptó el envío, False si falló (el usuario
+    y el token igual quedan creados; solo el correo pudo no llegar).
+    """
+    verification = EmailVerification(user_id=user.id)
+    db.session.add(verification)
+    db.session.commit()
+    return send_verification_email(user, verification.token)
+
 
 @api.route('/register', methods=['POST'])
 def register():
@@ -40,7 +59,78 @@ def register():
     new_user = User(email=email, password=password_hash, name=name)
     db.session.add(new_user)
     db.session.commit()
-    return jsonify({"message": "Registro exitoso :)"}), 201
+
+    # El registro ya quedó exitoso en este punto. Si el correo falla,
+    # no revertimos nada — el usuario puede pedir reenvío después.
+    email_sent = _create_and_send_verification(new_user)
+
+    if not email_sent:
+        return jsonify({
+            "message": "Registro exitoso, pero no pudimos enviar el correo de verificación. Puedes pedir que te lo reenviemos desde tu perfil."
+        }), 201
+
+    return jsonify({"message": "Registro exitoso :) Revisa tu correo para verificar tu cuenta."}), 201
+
+
+@api.route('/verify-email/<token>', methods=['GET'])
+def verify_email(token):
+    verification = EmailVerification.query.filter_by(token=token).first()
+
+    if verification is None:
+        return jsonify({"message": "Link de verificación inválido"}), 404
+
+    if verification.used:
+        return jsonify({"message": "Este link ya fue utilizado"}), 400
+
+    if verification.is_expired():
+        return jsonify({"message": "Este link expiró. Solicita uno nuevo desde tu perfil."}), 400
+
+    user = User.query.get(verification.user_id)
+    user.email_verified = True
+    verification.used = True
+    db.session.commit()
+
+    return jsonify({"message": "Correo verificado correctamente"}), 200
+
+
+@api.route('/resend-verification', methods=['POST'])
+def resend_verification():
+    body = request.get_json()
+    email = body.get("email")
+
+    if not email:
+        return jsonify({"message": "Falta el email"}), 400
+
+    generic_response = jsonify({
+        "message": "Si el correo existe en nuestro sistema, te enviamos un nuevo link de verificación."
+    })
+
+    user = User.query.filter_by(email=email).first()
+
+    # No revelamos si el correo existe o no — mismo mensaje en ambos casos.
+    if user is None:
+        return generic_response, 200
+
+    if user.email_verified:
+        return jsonify({"message": "Este correo ya está verificado."}), 200
+
+    # Rate limiting: revisamos el último token creado para este usuario.
+    last_verification = (
+        EmailVerification.query
+        .filter_by(user_id=user.id)
+        .order_by(EmailVerification.created_at.desc())
+        .first()
+    )
+    if last_verification:
+        time_since_last = datetime.utcnow() - last_verification.created_at
+        if time_since_last < timedelta(minutes=RESEND_COOLDOWN_MINUTES):
+            seconds_left = int((timedelta(minutes=RESEND_COOLDOWN_MINUTES) - time_since_last).total_seconds())
+            return jsonify({
+                "message": f"Espera {seconds_left} segundos antes de pedir otro reenvío."
+            }), 429
+
+    _create_and_send_verification(user)
+    return generic_response, 200
 
 
 def _merge_guest_cart_into_user(user_id, guest_token):

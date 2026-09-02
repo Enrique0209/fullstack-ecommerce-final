@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timedelta
+import uuid
 from sqlalchemy import String, Boolean, ForeignKey, Float, Integer, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -13,6 +14,9 @@ class User(db.Model):
     is_horeca: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False)
     is_admin: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False)
     name: Mapped[str]= mapped_column(String(80), nullable=False)
+    # Se marca True solo cuando el usuario hace click en su link de verificación.
+    # No bloquea login, solo se usa para restringir la compra "con cuenta" en order.py.
+    email_verified: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False)
 
 
     def serialize(self):
@@ -22,6 +26,7 @@ class User(db.Model):
             "is_horeca": self.is_horeca,
             "name": self.name,
             "is_admin": self.is_admin,
+            "email_verified": self.email_verified,
             # do not serialize the password, its a security breach
         }
     
@@ -167,4 +172,31 @@ class OrderItem(db.Model):
             "product_id": self.product_id,
             "quantity": self.quantity,
             "unit_price": self.unit_price,
+        }
+
+class EmailVerification(db.Model):
+    __tablename__ = "email_verification"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
+    # Token largo y aleatorio, no adivinable. Se manda dentro del link del correo.
+    token: Mapped[str] = mapped_column(String(36), unique=True, nullable=False, index=True, default=lambda: str(uuid.uuid4()))
+    created_at: Mapped[datetime] = mapped_column(DateTime(), nullable=False, default=datetime.utcnow)
+    # Se calcula al crear la fila: created_at + 24h. Cada reenvío crea una fila nueva
+    # con su propio token y su propia expiración, en vez de reciclar la anterior.
+    expires_at: Mapped[datetime] = mapped_column(DateTime(), nullable=False, default=lambda: datetime.utcnow() + timedelta(hours=24))
+    # True una vez que el token se usó para verificar. Evita que el mismo link
+    # se pueda reutilizar después de haber verificado la cuenta.
+    used: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False)
+
+    def is_expired(self):
+        return datetime.utcnow() > self.expires_at
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "token": self.token,
+            "created_at": self.created_at,
+            "expires_at": self.expires_at,
+            "used": self.used,
         }

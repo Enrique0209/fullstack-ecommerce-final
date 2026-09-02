@@ -78,6 +78,16 @@ def create_order():
         if user is None:
             return jsonify({"message": "Usuario no encontrado"}), 404
 
+        # Bloqueo de compra "con cuenta" si el correo no está verificado.
+        # Los invitados (user is None) nunca pasan por aquí, así que su
+        # flujo sigue exactamente igual que antes.
+        # Va antes de tocar PayPal a propósito: si vamos a rechazar el
+        # pedido de todas formas, mejor no gastar una llamada a su API.
+        if not user.email_verified:
+            return jsonify({
+                "message": "Verifica tu correo antes de comprar con tu cuenta. Revisa tu email o pide que te reenviemos el link de verificación."
+            }), 403
+
     body = request.get_json()
     paypal_order_id = body.get("paypal_order_id")
 
